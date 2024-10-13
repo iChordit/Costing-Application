@@ -1,9 +1,10 @@
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     line-height: 1.6;
     margin: 0;
     padding: 0;
     background-color: #f4f4f4;
+    overflow: hidden;
 }
 
 .container {
@@ -102,6 +103,7 @@ button:hover {
 .form-control, .form-select {
     font-size: 0.875rem;
     padding: 0.25rem 0.5rem;
+    border-radius: 5px;
 }
 
 .form-label {
@@ -135,6 +137,7 @@ button:hover {
 .btn {
     font-size: 0.875rem;
     padding: 0.375rem 0.75rem;
+    border-radius: 5px;
 }
 
 /* Make all form controls the same height */
@@ -175,4 +178,164 @@ button:hover {
 .readonly-input {
     background-color: #e9ecef;
     cursor: not-allowed;
+}
+
+.card {
+    border: none;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.card-header {
+    border-bottom: none;
+}
+
+#submitBtn {
+    transition: all 0.3s ease;
+}
+
+#submitBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.wrapper {
+    display: flex;
+    width: 100%;
+}
+
+#sidebar {
+    width: 300px; /* Increased from 250px to 300px */
+    min-width: 300px; /* Added to ensure consistent width */
+    max-width: 300px; /* Added to ensure consistent width */
+    transition: all 0.3s;
+    overflow-y: auto;
+    background-color: var(--bs-primary);
+    color: #fff;
+}
+
+#sidebar.active {
+    margin-left: -300px; /* Adjusted to match the new width */
+}
+
+#content {
+    flex-grow: 1;
+    padding: 20px;
+    transition: all 0.3s;
+    width: calc(100% - 300px); /* Adjust based on new sidebar width */
+}
+
+#content.active {
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    #sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        z-index: 999;
+        margin-left: -300px; /* Adjusted to match the new width */
+    }
+    #sidebar.active {
+        margin-left: 0;
+    }
+}
+
+header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+/* Update styles for sidebar links */
+#sidebar .list-unstyled.components {
+    padding: 20px 0;
+}
+
+#sidebar .list-unstyled.components li a {
+    padding: 15px 25px; /* Increased padding */
+    font-size: 1em; /* Slightly larger font size */
+    display: block;
+    color: #fff;
+    text-decoration: none;
+}
+
+#sidebar .list-unstyled.components li a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+#sidebar .list-unstyled.components li.active > a {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+#sidebar .sidebar-header {
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.1);
+}
+
+#sidebar .sidebar-header h3 {
+    font-size: 1.75em; /* Larger font size for the header */
+}
+
+#sidebar {
+    min-width: 250px;
+    max-width: 250px;
+    transition: all 0.3s;
+}
+
+#sidebar.collapsed {
+    margin-left: -250px;
+}
+
+#content {
+    width: 100%;
+    transition: all 0.3s;
+}
+
+#content.active {
+    margin-left: 0;
+}
+
+@media (max-width: 768px) {
+    #sidebar {
+        margin-left: -250px;
+    }
+    #sidebar.collapsed {
+        margin-left: 0;
+    }
+    #content {
+        margin-left: 0;
+    }
+    #content.active {
+        margin-left: 250px;
+    }
+}
+
+.sidebar-header {
+    padding: 20px;
+    background: #6d7fcc;
+}
+
+.sidebar-header h3 {
+    color: #fff;
+    margin: 0;
+}
+
+#sidebar.collapsed .sidebar-header h3 {
+    display: none;
+}
+
+#sidebar.collapsed .sidebar-header:after {
+    content: 'Menu';
+    color: #fff;
+    display: block;
+    transform: rotate(-90deg);
+    font-size: 18px;
+    padding: 10px;
+}
+
+.row > .col-md-4 {
+    margin-bottom: 15px;
 }

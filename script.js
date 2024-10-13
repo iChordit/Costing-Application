@@ -1,4 +1,13 @@
 document.addEventListener('DOMContentLoaded', function() {
+    var sidebarCollapse = document.getElementById('sidebarCollapse');
+    var sidebar = document.getElementById('sidebar');
+    var content = document.getElementById('content');
+
+    sidebarCollapse.addEventListener('click', function() {
+        sidebar.classList.toggle('collapsed');
+        content.classList.toggle('active');
+    });
+
     // Function to populate select fields
     function populateSelect(selectId, options) {
         const select = document.getElementById(selectId);
@@ -99,6 +108,9 @@ document.addEventListener('DOMContentLoaded', function() {
         row.querySelector('.item-total-cost-kwd').value = totalCostKWD.toFixed(4);
 
         console.log(`Row updated: Quantity: ${quantity}, Cost: ${cost}, Discounted Cost: ${discountedCost.toFixed(4)}, Total Cost: ${totalCost.toFixed(4)}, Total Cost KWD: ${totalCostKWD.toFixed(4)}`);
+
+        // After updating the row, call updateTotals
+        updateTotals();
     }
 
     // Function to update all rows
@@ -108,7 +120,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Add event listeners
-    addRowBtn.addEventListener('click', addNewRow);
+    addRowBtn.addEventListener('click', () => {
+        addNewRow();
+        updateTotals();
+    });
     discountInput.addEventListener('input', updateAllRows);
     exchangeRateInput.addEventListener('input', updateAllRows);
     recalculateBtn.addEventListener('click', recalculateDiscountedCosts);
@@ -126,6 +141,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <td><input type="number" class="form-control form-control-sm item-discounted-cost readonly-input" readonly></td>
             <td><input type="number" class="form-control form-control-sm item-total-cost readonly-input" readonly></td>
             <td><input type="number" class="form-control form-control-sm item-total-cost-kwd readonly-input" readonly></td>
+            <td><input type="number" class="form-control form-control-sm freight-charges readonly-input" disabled></td>
             <td><button type="button" class="btn btn-danger btn-sm delete-row">Delete</button></td>
         `;
         rowCounter++;
@@ -134,11 +150,17 @@ document.addEventListener('DOMContentLoaded', function() {
         const costInput = newRow.querySelector('.item-cost');
         const deleteBtn = newRow.querySelector('.delete-row');
 
-        quantityInput.addEventListener('input', () => updateRowCalculations(newRow));
-        costInput.addEventListener('input', () => updateRowCalculations(newRow));
+        quantityInput.addEventListener('input', () => {
+            updateRowCalculations(newRow);
+            updateTotals();
+        });
+        costInput.addEventListener('input', () => {
+            updateRowCalculations(newRow);
+            updateTotals();
+        });
         deleteBtn.addEventListener('click', () => {
             deleteRow(newRow);
-            updateAllRows();
+            updateTotals();
         });
 
         updateRowCalculations(newRow);
@@ -160,4 +182,31 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Add an initial row
     addNewRow();
+
+    // Function to calculate and update totals
+    function updateTotals() {
+        let totalCost = 0;
+        let totalCostKWD = 0;
+
+        // Iterate through all rows in the item table
+        document.querySelectorAll('#itemTable tbody tr').forEach(row => {
+            const totalCostForRow = parseFloat(row.querySelector('.item-total-cost').value) || 0;
+            const totalCostKWDForRow = parseFloat(row.querySelector('.item-total-cost-kwd').value) || 0;
+
+            totalCost += totalCostForRow;
+            totalCostKWD += totalCostKWDForRow;
+        });
+
+        // Update the Total Summary fields
+        document.getElementById('totalCost').value = totalCost.toFixed(2);
+        document.getElementById('totalCostKWD').value = totalCostKWD.toFixed(2);
+    }
+
+    // Add event listeners to the item table
+    document.getElementById('itemTable').addEventListener('input', updateTotals);
+
+    // Call updateTotals initially to set starting values
+    updateTotals();
+
+    // Remember to call updateTotals() whenever you add or remove rows from the table
 });
