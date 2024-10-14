@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
     populateSelect('sector', ['Sector A', 'Sector B', 'Sector C']);
     populateSelect('currency', ['USD', 'EUR', 'GBP', 'JPY']);
     populateSelect('priceBasis', ['FOB', 'CIF', 'EXW']);
-    populateSelect('costOfMoney', ['1%', '2%', '3%', '4%', '5%']);
+    populateSelect('costOfMoney', ['6.5%', '2.5%']);
     populateSelect('country', ['USA', 'UK', 'Germany', 'Japan']);
     populateSelect('clearanceFeesTemplate', ['Template A', 'Template B', 'Template C']);
 
@@ -64,6 +64,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const discountInput = document.getElementById('discount');
     const exchangeRateInput = document.getElementById('exchangeRate');
     const freightValueInput = document.getElementById('freightValue');
+    const costOfMoneyInput = document.getElementById('costOfMoney');
 
     let rowCounter = 1;
 
@@ -100,19 +101,22 @@ document.addEventListener('DOMContentLoaded', function() {
         const discount = parseFloat(document.getElementById('discount').value) || 0;
         const exchangeRate = parseFloat(document.getElementById('exchangeRate').value) || 1;
         const freight = parseFloat(document.getElementById('freightValue').value) || 0;
+        const costOfMoney = parseFloat(document.getElementById('costOfMoney').value) || 0;
 
         const discountedCost = cost * (1 - discount / 100);
         const totalCost = discountedCost * quantity;
         const totalCostKD = totalCost * exchangeRate;
+        const totalCostOfMoney = totalCostKD * costOfMoney /100;
 
         row.querySelector('.item-discounted-cost').value = discountedCost.toFixed(4);
         row.querySelector('.item-total-cost').value = totalCost.toFixed(4);
         row.querySelector('.item-total-cost-kd').value = totalCostKD.toFixed(4);
+        row.querySelector('.cost-of-money').value = totalCostOfMoney.toFixed(4);
 
         // We'll calculate the line freight charge in the updateTotals function
         // because we need the total cost (KD) for all rows
 
-        console.log(`Row updated: Quantity: ${quantity}, Cost: ${cost}, Discounted Cost: ${discountedCost.toFixed(4)}, Total Cost: ${totalCost.toFixed(4)}, Total Cost KD: ${totalCostKD.toFixed(4)}`);
+        console.log(`Row updated: Quantity: ${quantity}, Cost: ${cost}, Discounted Cost: ${discountedCost.toFixed(4)}, Total Cost: ${totalCost.toFixed(4)}, Total Cost KD: ${totalCostKD.toFixed(4)}, Cost of Money: ${costOfMoney.toFixed(4)}`);
 
         // After updating the row, call updateTotals
         updateTotals();
@@ -132,6 +136,7 @@ document.addEventListener('DOMContentLoaded', function() {
     discountInput.addEventListener('input', updateAllRows);
     exchangeRateInput.addEventListener('input', updateAllRows);
     freightValueInput.addEventListener('input', updateAllRows);
+    costOfMoneyInput.addEventListener('input', updateAllRows);
 
     function addNewRow() {
         const tbody = itemTable.querySelector('tbody') || itemTable.createTBody();
@@ -147,6 +152,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <td><input type="number" class="form-control form-control-sm item-total-cost readonly-input" readonly></td>
             <td><input type="number" class="form-control form-control-sm item-total-cost-kd readonly-input" readonly></td>
             <td><input type="number" class="form-control form-control-sm freight-charges readonly-input" readonly></td>
+            <td><input type="number" class="form-control form-control-sm cost-of-money readonly-input" readonly></td>
             <td><button type="button" class="btn btn-danger btn-sm delete-row">Delete</button></td>
         `;
         rowCounter++;
@@ -192,21 +198,26 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateTotals() {
         let totalCost = 0;
         let totalCostKD = 0;
+        let totalCostOfMoney = 0;
         const rows = document.querySelectorAll('#itemTable tbody tr');
         const freight = parseFloat(document.getElementById('freightValue').value) || 0;
+        
 
         // First pass: calculate total costs
         rows.forEach(row => {
             const totalCostForRow = parseFloat(row.querySelector('.item-total-cost').value) || 0;
             const totalCostKDForRow = parseFloat(row.querySelector('.item-total-cost-kd').value) || 0;
+            const costOfMoneyForRow = parseFloat(row.querySelector('.cost-of-money').value) || 0;
 
             totalCost += totalCostForRow;
             totalCostKD += totalCostKDForRow;
+            totalCostOfMoney += costOfMoneyForRow;
         });
 
         // Update the Total Summary fields
         document.getElementById('totalCost').value = totalCost.toFixed(2);
         document.getElementById('totalCostKD').value = totalCostKD.toFixed(2);
+        document.getElementById('totalCostOfMoney').value = totalCostOfMoney.toFixed(2);
 
         // Second pass: calculate and update line freight charges
         rows.forEach(row => {
