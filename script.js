@@ -34,11 +34,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // Toggle visibility of freight value input
     document.getElementById('freightCharges').addEventListener('change', function() {
         document.getElementById('freightValueGroup').style.display = this.checked ? 'block' : 'none';
+        document.getElementById('freightValue').value = 0.0000;
+        updateTotals();
     });
 
     // Toggle visibility of custom charges percentage input
     document.getElementById('customCharges').addEventListener('change', function() {
         document.getElementById('customChargesGroup').style.display = this.checked ? 'block' : 'none';
+        document.getElementById('customChargesPercentage').value = 0.0000;
+        updateAllRows()
+        updateTotals();
     });
 
     // Form submission handler
@@ -254,8 +259,5 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Add event listeners for freight value changes
     document.getElementById('freightValue').addEventListener('input', updateTotals);
-
-    function formatNumber(number) {
-        return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    }
+    
 });
