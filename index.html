@@ -227,18 +227,19 @@
                                     <table class="table table-striped table-hover" id="itemTable">
                                         <thead>
                                             <tr>
-                                                <th>SN</th>
-                                                <th>Item Code</th>
-                                                <th>CMS Code</th>
-                                                <th>Item Description</th>
-                                                <th>Quantity</th>
-                                                <th>Cost (unit)</th>
-                                                <th>Discounted Cost (unit)</th>
-                                                <th>Total Cost</th>
-                                                <th>Total Cost (KD)</th>
-                                                <th>Freight Charges</th>
-                                                <th>Cost of Money</th>
-                                                <th>Action</th>
+                                                <th style="width: 5%;">SN</th>
+                                                <th style="width: 10%;">Item Code</th>
+                                                <th style="width: 10%;">CMS Code</th>
+                                                <th style="width: 20%;">Item Description</th>
+                                                <th style="width: 5%;">Quantity</th>
+                                                <th style="width: 8%;">Cost (unit)</th>
+                                                <th style="width: 8%;">Discounted Cost (unit)</th>
+                                                <th style="width: 8%;">Total Cost</th>
+                                                <th style="width: 8%;">Total Cost (KD)</th>
+                                                <th style="width: 6%;">Freight Charges</th>
+                                                <th style="width: 6%;">Cost of Money</th>
+                                                <th style="width: 6%;">Clearing Charges</th>
+                                                <th style="width: 5%;">Action</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -269,9 +270,13 @@
                                         <label class="form-label">Total Cost (KD)</label>
                                         <input type="text" class="form-control form-control-sm" id="totalCostKD" disabled>
                                     </div>
-                                    <div class="col-md-4"></div>
+                                    <div class="col-md-4">
                                         <label class="form-label">Total Cost of Money</label>
                                         <input type="text" class="form-control form-control-sm" id="totalCostOfMoney" disabled>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Total Clearing Charges</label>
+                                        <input type="text" class="form-control form-control-sm" id="totalClearingCharges" disabled>
                                     </div>
                                 </div>
                             </div>
