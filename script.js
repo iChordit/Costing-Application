@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
     populateSelect('priceBasis', ['FOB', 'CIF', 'EXW']);
     populateSelect('costOfMoney', ['6.5%', '2.5%']);
     populateSelect('country', ['USA', 'UK', 'Germany', 'Japan']);
-    populateSelect('clearanceFeesTemplate', ['Template A', 'Template B', 'Template C']);
+    populateSelect('clearanceFeesTemplate', ['Standard', 'No Fees']);
 
     // Toggle visibility of freight value input
     document.getElementById('freightCharges').addEventListener('change', function() {
@@ -107,28 +107,24 @@ document.addEventListener('DOMContentLoaded', function() {
         const cost = parseFloat(row.querySelector('.item-cost').value) || 0;
         const discount = parseFloat(document.getElementById('discount').value) || 0;
         const exchangeRate = parseFloat(document.getElementById('exchangeRate').value) || 1;
-        const freight = parseFloat(document.getElementById('freightValue').value) || 0;
         const costOfMoney = parseFloat(document.getElementById('costOfMoney').value) || 0;
-        const clearingCharges = parseFloat(document.getElementById('clearingCharges').value) || 0;
         const customCharges = parseFloat(document.getElementById('customChargesPercentage').value) || 0;
 
         const discountedCost = cost * (1 - discount / 100);
         const totalCost = discountedCost * quantity;
         const totalCostKD = totalCost * exchangeRate;
-        const totalCostOfMoney = totalCostKD * costOfMoney /100;
-        const totalClearingCharges = totalCostKD * clearingCharges /100;
-        const totalCustomCharges = totalCostKD * customCharges /100;
+        const totalCostOfMoney = totalCostKD * costOfMoney / 100;
+        const totalCustomCharges = totalCostKD * customCharges / 100;
+
         row.querySelector('.item-discounted-cost').value = discountedCost.toFixed(4);
         row.querySelector('.item-total-cost').value = totalCost.toFixed(4);
         row.querySelector('.item-total-cost-kd').value = totalCostKD.toFixed(4);
         row.querySelector('.cost-of-money').value = totalCostOfMoney.toFixed(4);
-        row.querySelector('.clearing-charges').value = totalClearingCharges.toFixed(4);
         row.querySelector('.custom-charges').value = totalCustomCharges.toFixed(4);
 
-        // We'll calculate the line freight charge in the updateTotals function
-        // because we need the total cost (KD) for all rows
+        // We'll calculate the line freight charge and clearing charges in the updateTotals function
 
-        console.log(`Row updated: Quantity: ${quantity}, Cost: ${cost}, Discounted Cost: ${discountedCost.toFixed(4)}, Total Cost: ${totalCost.toFixed(4)}, Total Cost KD: ${totalCostKD.toFixed(4)}, Cost of Money: ${costOfMoney.toFixed(4)}, Clearing Charges: ${clearingCharges.toFixed(4)}, Custom Charges: ${customCharges.toFixed(4)}`);
+        console.log(`Row updated: Quantity: ${quantity}, Cost: ${cost}, Discounted Cost: ${discountedCost.toFixed(4)}, Total Cost: ${totalCost.toFixed(4)}, Total Cost KD: ${totalCostKD.toFixed(4)}, Cost of Money: ${totalCostOfMoney.toFixed(4)}, Custom Charges: ${totalCustomCharges.toFixed(4)}`);
 
         // After updating the row, call updateTotals
         updateTotals();
@@ -215,25 +211,35 @@ document.addEventListener('DOMContentLoaded', function() {
         let totalCost = 0;
         let totalCostKD = 0;
         let totalCostOfMoney = 0;
-        let totalClearingCharges = 0;
         let totalCustomCharges = 0;
         const rows = document.querySelectorAll('#itemTable tbody tr');
         const freight = parseFloat(document.getElementById('freightValue').value) || 0;
-        
+        const clearingCharges = parseFloat(document.getElementById('clearingCharges').value) || 0;
+        const containers = parseInt(document.getElementById('containers').value) || 1;
+        const clearanceFeesTemplate = document.getElementById('clearanceFeesTemplate').value;
 
         // First pass: calculate total costs
         rows.forEach(row => {
             const totalCostForRow = parseFloat(row.querySelector('.item-total-cost').value) || 0;
             const totalCostKDForRow = parseFloat(row.querySelector('.item-total-cost-kd').value) || 0;
             const costOfMoneyForRow = parseFloat(row.querySelector('.cost-of-money').value) || 0;
-            const clearingChargesForRow = parseFloat(row.querySelector('.clearing-charges').value) || 0;
             const customChargesForRow = parseFloat(row.querySelector('.custom-charges').value) || 0;
             totalCost += totalCostForRow;
             totalCostKD += totalCostKDForRow;
             totalCostOfMoney += costOfMoneyForRow;
-            totalClearingCharges += clearingChargesForRow;
             totalCustomCharges += customChargesForRow;
         });
+
+        // Calculate total clearing charges based on the selected template
+        let totalClearingCharges;
+        if (clearanceFeesTemplate === 'Standard') {
+            totalClearingCharges = (totalCostKD * clearingCharges / 100) + 95 + (230 * containers);
+        } else if (clearanceFeesTemplate === 'No Fee') {
+            totalClearingCharges = totalCostKD * clearingCharges / 100;
+        } else {
+            // Default to 'No Fee' calculation if no template is selected or an unknown template is chosen
+            totalClearingCharges = totalCostKD * clearingCharges / 100;
+        }
 
         // Update the Total Summary fields
         document.getElementById('totalCost').value = totalCost.toFixed(2);
@@ -241,11 +247,15 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('totalCostOfMoney').value = totalCostOfMoney.toFixed(2);
         document.getElementById('totalClearingCharges').value = totalClearingCharges.toFixed(2);
         document.getElementById('totalCustomCharges').value = totalCustomCharges.toFixed(2);
-        // Second pass: calculate and update line freight charges
+
+        // Second pass: update line freight charges and clearing charges
         rows.forEach(row => {
             const totalCostKDForRow = parseFloat(row.querySelector('.item-total-cost-kd').value) || 0;
             const lineFreightCharge = totalCostKD > 0 ? (totalCostKDForRow / totalCostKD) * freight : 0;
+            const lineClearingCharge = totalCostKD > 0 ? (totalCostKDForRow / totalCostKD) * totalClearingCharges : 0;
+            
             row.querySelector('.freight-charges').value = lineFreightCharge.toFixed(4);
+            row.querySelector('.clearing-charges').value = lineClearingCharge.toFixed(4);
         });
     }
 
@@ -260,4 +270,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add event listeners for freight value changes
     document.getElementById('freightValue').addEventListener('input', updateTotals);
     
+    // Add event listener for clearance fees template changes
+    document.getElementById('clearanceFeesTemplate').addEventListener('change', updateAllRows);
+    document.getElementById('containers').addEventListener('input', updateAllRows);
+
+    // Update event listeners
+    document.getElementById('clearingCharges').addEventListener('input', updateAllRows);
+    document.getElementById('containers').addEventListener('input', updateAllRows);
 });
