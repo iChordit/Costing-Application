@@ -20,9 +20,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Populate select fields with sample data
-    populateSelect('company', ['Company A', 'Company B', 'Company C']);
-    populateSelect('department', ['HR', 'Finance', 'IT', 'Marketing']);
-    populateSelect('division', ['Division 1', 'Division 2', 'Division 3']);
+    populateSelect('company', ['AHC', 'FDMC', 'MeDesign']);
+    populateSelect('department', ['Pharma', 'Non-Pharma', 'IT', 'Marketing']);
+    populateSelect('division', ['Dental', 'Derma', 'Ortho']);
     populateSelect('principal', ['Principal 1', 'Principal 2', 'Principal 3']);
     populateSelect('sector', ['Sector A', 'Sector B', 'Sector C']);
     populateSelect('currency', ['USD', 'EUR', 'GBP', 'JPY']);
@@ -299,13 +299,13 @@ document.addEventListener('DOMContentLoaded', function() {
             `);
         });
 
-        // Update the Total Summary fields
-        document.getElementById('totalCost').value = totalCost.toFixed(2);
-        document.getElementById('totalCostKD').value = totalCostKD.toFixed(2);
-        document.getElementById('totalCostOfMoney').value = totalCostOfMoney.toFixed(2);
-        document.getElementById('totalClearingCharges').value = totalClearingCharges.toFixed(2);
-        document.getElementById('totalCustomCharges').value = totalCustomCharges.toFixed(2);
-        document.getElementById('totalLandedCost').value = totalLandedCost.toFixed(2);
+        // Update the Total Summary fields with formatted numbers
+        document.getElementById('totalCost').value = formatNumber(totalCost, 2);
+        document.getElementById('totalCostKD').value = formatNumber(totalCostKD, 2);
+        document.getElementById('totalCostOfMoney').value = formatNumber(totalCostOfMoney, 2);
+        document.getElementById('totalClearingCharges').value = formatNumber(totalClearingCharges, 2);
+        document.getElementById('totalCustomCharges').value = formatNumber(totalCustomCharges, 2);
+        document.getElementById('totalLandedCost').value = formatNumber(totalLandedCost, 2);
     }
 
     // Add event listeners to the item table
@@ -326,4 +326,44 @@ document.addEventListener('DOMContentLoaded', function() {
     // Update event listeners
     document.getElementById('clearingCharges').addEventListener('input', updateAllRows);
     document.getElementById('containers').addEventListener('input', updateAllRows);
+
+    function formatNumber(number, decimals = 2) {
+        return number.toLocaleString('en-US', {
+            minimumFractionDigits: decimals,
+            maximumFractionDigits: decimals
+        });
+    }
+
+    function parseFormattedNumber(value) {
+        return parseFloat(value.replace(/,/g, ''));
+    }
+
+    function setupNumericInput(inputId, decimals = 2) {
+        const input = document.getElementById(inputId);
+        input.addEventListener('blur', function() {
+            const value = parseFormattedNumber(this.value);
+            if (!isNaN(value)) {
+                this.value = formatNumber(value, decimals);
+            }
+        });
+        input.addEventListener('focus', function() {
+            this.value = this.value.replace(/,/g, '');
+        });
+    }
+
+    // Set up numeric inputs
+    setupNumericInput('exchangeRate', 4);
+    setupNumericInput('discount', 2);
+    setupNumericInput('containers', 0);
+    setupNumericInput('clearingCharges', 2);
+    setupNumericInput('freightValue', 4);
+    setupNumericInput('customChargesPercentage', 2);
+
+    // Set up numeric inputs for total summary fields
+    setupNumericInput('totalCost', 2);
+    setupNumericInput('totalCostKD', 2);
+    setupNumericInput('totalCostOfMoney', 2);
+    setupNumericInput('totalClearingCharges', 2);
+    setupNumericInput('totalCustomCharges', 2);
+    setupNumericInput('totalLandedCost', 2);
 });
