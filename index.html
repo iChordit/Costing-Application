@@ -210,8 +210,8 @@
                                                 <label class="form-check-label" for="customCharges">Custom Charges</label>
                                             </div>
                                             <div class="mt-2" id="customChargesGroup" style="display: none;">
-                                                <label for="customChargesPercentage" class="form-label">Custom Charges % *</label>
-                                                <input type="number" class="form-control form-control-sm" id="customChargesPercentage" name="customChargesPercentage" value="5" step="0.01">
+                                                <label for="customChargesPercentage" class="form-label">Custom Charges %</label>
+                                                <input type="number" class="form-control form-control-sm" id="customChargesPercentage" value="0" min="0" step="0.01">
                                             </div>
                                         </div>
                                         <div class="col-md-4">
@@ -246,6 +246,7 @@
                                                     <th style="width: 10%;">CMS Code</th>
                                                     <th style="width: 15%;">Item Description</th>
                                                     <th style="width: 5%;">Quantity</th>
+                                                    <th style="width: 5%;">UOM</th>
                                                     <th style="width: 7%;">Cost (unit)</th>
                                                     <th style="width: 7%;">Discounted Cost (unit)</th>
                                                     <th style="width: 7%;">Total Cost</th>

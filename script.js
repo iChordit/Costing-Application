@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Toggle visibility of custom charges percentage input
     document.getElementById('customCharges').addEventListener('change', function() {
         document.getElementById('customChargesGroup').style.display = this.checked ? 'block' : 'none';
-        document.getElementById('customChargesPercentage').value = 0.0000;
+        document.getElementById('customChargesPercentage').value = 0;
         updateAllRows()
         updateTotals();
     });
@@ -148,6 +148,18 @@ document.addEventListener('DOMContentLoaded', function() {
     clearingChargesInput.addEventListener('input', updateAllRows);
     customChargesInput.addEventListener('input', updateAllRows);
 
+    // Add this function at the beginning of your script
+    function populateUOMOptions(selectElement) {
+        const uomOptions = ['Piece', 'Box', 'Kg', 'Liter', 'Meter', 'Square Meter', 'Cubic Meter', 'Dozen', 'Pack', 'Set'];
+        uomOptions.forEach(option => {
+            const optionElement = document.createElement('option');
+            optionElement.value = option;
+            optionElement.textContent = option;
+            selectElement.appendChild(optionElement);
+        });
+    }
+
+    // Update the addNewRow function
     function addNewRow() {
         const tbody = itemTable.querySelector('tbody') || itemTable.createTBody();
         const newRow = tbody.insertRow();
@@ -157,6 +169,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <td><input type="text" class="form-control form-control-sm cms-code"></td>
             <td><input type="text" class="form-control form-control-sm item-description"></td>
             <td><input type="number" class="form-control form-control-sm item-quantity" value="1" min="1"></td>
+            <td><select class="form-select form-select-sm item-uom"></select></td>
             <td><input type="number" class="form-control form-control-sm item-cost" value="0" step="0.01"></td>
             <td><input type="number" class="form-control form-control-sm item-discounted-cost readonly-input" readonly></td>
             <td><input type="number" class="form-control form-control-sm item-total-cost readonly-input" readonly></td>
@@ -174,6 +187,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const quantityInput = newRow.querySelector('.item-quantity');
         const costInput = newRow.querySelector('.item-cost');
         const deleteBtn = newRow.querySelector('.delete-row');
+        const uomSelect = newRow.querySelector('.item-uom');
+
+        // Populate UOM dropdown
+        populateUOMOptions(uomSelect);
 
         quantityInput.addEventListener('input', () => {
             updateRowCalculations(newRow);
