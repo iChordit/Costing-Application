@@ -166,6 +166,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <td><input type="number" class="form-control form-control-sm clearing-charges readonly-input" readonly></td>
             <td><input type="number" class="form-control form-control-sm custom-charges readonly-input" readonly></td>
             <td><input type="number" class="form-control form-control-sm total-landed-cost readonly-input" readonly></td>
+            <td><input type="number" class="form-control form-control-sm unit-landed-cost-kd readonly-input" readonly></td>
             <td><button type="button" class="btn btn-danger btn-sm delete-row">X</button></td>
         `;
         rowCounter++;
@@ -243,17 +244,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         let totalLandedCost = 0;
-        rows.forEach(row => {
-            totalLandedCost += parseFloat(row.querySelector('.total-landed-cost').value) || 0;
-        });
-
-        // Update the Total Summary fields
-        document.getElementById('totalCost').value = totalCost.toFixed(2);
-        document.getElementById('totalCostKD').value = totalCostKD.toFixed(2);
-        document.getElementById('totalCostOfMoney').value = totalCostOfMoney.toFixed(2);
-        document.getElementById('totalClearingCharges').value = totalClearingCharges.toFixed(2);
-        document.getElementById('totalCustomCharges').value = totalCustomCharges.toFixed(2);
-        document.getElementById('totalLandedCost').value = totalLandedCost.toFixed(2);
 
         // Second pass: update line freight charges, clearing charges, and total landed cost
         rows.forEach(row => {
@@ -267,9 +257,38 @@ document.addEventListener('DOMContentLoaded', function() {
             // Calculate and update Total Landed Cost
             const costOfMoney = parseFloat(row.querySelector('.cost-of-money').value) || 0;
             const customCharges = parseFloat(row.querySelector('.custom-charges').value) || 0;
-            const totalLandedCost = lineFreightCharge + costOfMoney + lineClearingCharge + customCharges;
-            row.querySelector('.total-landed-cost').value = totalLandedCost.toFixed(4);
+            const rowLandedCost = totalCostKDForRow + lineFreightCharge + costOfMoney + lineClearingCharge + customCharges;
+            row.querySelector('.total-landed-cost').value = rowLandedCost.toFixed(4);
+
+            // Calculate and update Unit Landed Cost (KD)
+            const quantity = parseFloat(row.querySelector('.item-quantity').value) || 1;
+            const unitLandedCostKD = quantity > 0 ? rowLandedCost / quantity : 0;
+            row.querySelector('.unit-landed-cost-kd').value = unitLandedCostKD.toFixed(4);
+
+            totalLandedCost += rowLandedCost;
+
+            console.log(`Detailed calculation:
+                Quantity: ${quantity}
+                Cost: ${parseFloat(row.querySelector('.item-cost').value) || 0}
+                Discounted Cost: ${parseFloat(row.querySelector('.item-discounted-cost').value) || 0}
+                Total Cost: ${totalCostKDForRow}
+                Total Cost KD: ${totalCostKDForRow}
+                Freight Charges: ${lineFreightCharge}
+                Cost of Money: ${costOfMoney}
+                Clearing Charges: ${lineClearingCharge}
+                Custom Charges: ${customCharges}
+                Total Landed Cost: ${rowLandedCost}
+                Unit Landed Cost (KD): ${unitLandedCostKD}
+            `);
         });
+
+        // Update the Total Summary fields
+        document.getElementById('totalCost').value = totalCost.toFixed(2);
+        document.getElementById('totalCostKD').value = totalCostKD.toFixed(2);
+        document.getElementById('totalCostOfMoney').value = totalCostOfMoney.toFixed(2);
+        document.getElementById('totalClearingCharges').value = totalClearingCharges.toFixed(2);
+        document.getElementById('totalCustomCharges').value = totalCustomCharges.toFixed(2);
+        document.getElementById('totalLandedCost').value = totalLandedCost.toFixed(2);
     }
 
     // Add event listeners to the item table
