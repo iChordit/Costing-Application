@@ -189,7 +189,7 @@
                                         <div class="col-md-4">
                                             <label for="clearanceFeesTemplate" class="form-label">Clearance Fees Template *</label>
                                             <select class="form-select" id="clearanceFeesTemplate" name="clearanceFeesTemplate" required>
-                                                <option value="">-Select-</option>
+                                                <!-- options will be added here dynamically -->
                                             </select>
                                         </div>
                                     </div>
@@ -254,6 +254,7 @@
                                                     <th style="width: 6%;">Cost of Money</th>
                                                     <th style="width: 6%;">Clearing Charges</th>
                                                     <th style="width: 6%;">Custom Charges</th>
+                                                    <th style="width: 8%;">Total Landed Cost</th>
                                                     <th style="width: 5%;">Action</th>
                                                 </tr>
                                             </thead>
@@ -297,6 +298,10 @@
                                     <div class="col-md-4">
                                         <label class="form-label">Total Custom Charges</label>
                                         <input type="text" class="form-control form-control-sm" id="totalCustomCharges" disabled>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Total Landed Cost</label>
+                                        <input type="text" class="form-control form-control-sm" id="totalLandedCost" disabled>
                                     </div>
                                 </div>
                             </div>

@@ -165,6 +165,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <td><input type="number" class="form-control form-control-sm cost-of-money readonly-input" readonly></td>
             <td><input type="number" class="form-control form-control-sm clearing-charges readonly-input" readonly></td>
             <td><input type="number" class="form-control form-control-sm custom-charges readonly-input" readonly></td>
+            <td><input type="number" class="form-control form-control-sm total-landed-cost readonly-input" readonly></td>
             <td><button type="button" class="btn btn-danger btn-sm delete-row">X</button></td>
         `;
         rowCounter++;
@@ -241,14 +242,20 @@ document.addEventListener('DOMContentLoaded', function() {
             totalClearingCharges = totalCostKD * clearingCharges / 100;
         }
 
+        let totalLandedCost = 0;
+        rows.forEach(row => {
+            totalLandedCost += parseFloat(row.querySelector('.total-landed-cost').value) || 0;
+        });
+
         // Update the Total Summary fields
         document.getElementById('totalCost').value = totalCost.toFixed(2);
         document.getElementById('totalCostKD').value = totalCostKD.toFixed(2);
         document.getElementById('totalCostOfMoney').value = totalCostOfMoney.toFixed(2);
         document.getElementById('totalClearingCharges').value = totalClearingCharges.toFixed(2);
         document.getElementById('totalCustomCharges').value = totalCustomCharges.toFixed(2);
+        document.getElementById('totalLandedCost').value = totalLandedCost.toFixed(2);
 
-        // Second pass: update line freight charges and clearing charges
+        // Second pass: update line freight charges, clearing charges, and total landed cost
         rows.forEach(row => {
             const totalCostKDForRow = parseFloat(row.querySelector('.item-total-cost-kd').value) || 0;
             const lineFreightCharge = totalCostKD > 0 ? (totalCostKDForRow / totalCostKD) * freight : 0;
@@ -256,6 +263,12 @@ document.addEventListener('DOMContentLoaded', function() {
             
             row.querySelector('.freight-charges').value = lineFreightCharge.toFixed(4);
             row.querySelector('.clearing-charges').value = lineClearingCharge.toFixed(4);
+
+            // Calculate and update Total Landed Cost
+            const costOfMoney = parseFloat(row.querySelector('.cost-of-money').value) || 0;
+            const customCharges = parseFloat(row.querySelector('.custom-charges').value) || 0;
+            const totalLandedCost = lineFreightCharge + costOfMoney + lineClearingCharge + customCharges;
+            row.querySelector('.total-landed-cost').value = totalLandedCost.toFixed(4);
         });
     }
 
