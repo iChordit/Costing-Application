@@ -118,6 +118,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const totalCustomCharges = totalCostKD * customCharges / 100;
         const sellInOriginalCurrency = document.getElementById('sellOriginalCurrency').checked;
         const totalSalesValue = sellInOriginalCurrency ? salePrice * quantity : (salePrice * quantity) / exchangeRate;
+        const totalSalesValueKWD = sellInOriginalCurrency ? totalSalesValue * exchangeRate : salePrice * quantity;
 
         row.querySelector('.item-discounted-cost').value = discountedCost.toFixed(4);
         row.querySelector('.item-total-cost').value = totalCost.toFixed(4);
@@ -125,6 +126,7 @@ document.addEventListener('DOMContentLoaded', function() {
         row.querySelector('.cost-of-money').value = totalCostOfMoney.toFixed(4);
         row.querySelector('.custom-charges').value = totalCustomCharges.toFixed(4);
         row.querySelector('.total-sale-value').value = totalSalesValue.toFixed(4);
+        row.querySelector('.total-sale-value-kwd').value = totalSalesValueKWD.toFixed(4);
 
         // We'll calculate the line freight charge and clearing charges in the updateTotals function
 
@@ -187,6 +189,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <td><input type="number" class="form-control form-control-sm unit-landed-cost-oc readonly-input" readonly></td>
             <td><input type="number" class="form-control form-control-sm sale-price" value="0" step="0.01"></td>
             <td><input type="number" class="form-control form-control-sm total-sale-value readonly-input" readonly></td>
+            <td><input type="number" class="form-control form-control-sm total-sale-value-kwd readonly-input" readonly></td>
             <td><button type="button" class="btn btn-danger btn-sm delete-row">X</button></td>
         `;
         rowCounter++;
@@ -244,6 +247,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let totalCostOfMoney = 0;
         let totalCustomCharges = 0;
         let totalSalesValue = 0;
+        let totalSalesValueKWD = 0;
         const rows = document.querySelectorAll('#itemTable tbody tr');
         const freight = parseFloat(document.getElementById('freightValue').value) || 0;
         const clearingCharges = parseFloat(document.getElementById('clearingCharges').value) || 0;
@@ -257,11 +261,13 @@ document.addEventListener('DOMContentLoaded', function() {
             const costOfMoneyForRow = parseFloat(row.querySelector('.cost-of-money').value) || 0;
             const customChargesForRow = parseFloat(row.querySelector('.custom-charges').value) || 0;
             const totalSalesValueForRow = parseFloat(row.querySelector('.total-sale-value').value) || 0;
+            const totalSalesValueKWDForRow = parseFloat(row.querySelector('.total-sale-value-kwd').value) || 0;
             totalCost += totalCostForRow;
             totalCostKD += totalCostKDForRow;
             totalCostOfMoney += costOfMoneyForRow;
             totalCustomCharges += customChargesForRow;
             totalSalesValue += totalSalesValueForRow;
+            totalSalesValueKWD += totalSalesValueKWDForRow;
         });
 
         // Calculate total clearing charges based on the selected template
@@ -326,6 +332,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('totalCustomCharges').value = formatNumber(totalCustomCharges, 2);
         document.getElementById('totalLandedCost').value = formatNumber(totalLandedCost, 2);
         document.getElementById('totalSalesValue').value = formatNumber(totalSalesValue, 2);
+        document.getElementById('totalSalesValueKWD').value = formatNumber(totalSalesValueKWD, 2);
 
     }
 
@@ -388,6 +395,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setupNumericInput('totalCustomCharges', 2);
     setupNumericInput('totalLandedCost', 2);
     setupNumericInput('totalSalesValue', 2);
+    setupNumericInput('totalSalesValueKWD', 2);
 
     // Add this new function to set up the table layout
     function setupTableLayout() {
@@ -413,6 +421,7 @@ document.addEventListener('DOMContentLoaded', function() {
             '100px', // Unit Landed Cost OC
             '100px', // Sale Price
             '100px', // Total Sale Value
+            '100px', // Total Sale Value (KWD)
             '50px'   // Delete button
         ];
 
@@ -443,7 +452,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (sellOriginalCurrencyCheckbox.checked) {
             salePriceHeader.textContent = 'Sale Price ('+document.getElementById('currency').value+'/unit)';
         } else {
-            salePriceHeader.textContent = 'Sale Price (KD/unit)';
+            salePriceHeader.textContent = 'Sale Price (KWD/unit)';
         }
         updateAllRows();
     }

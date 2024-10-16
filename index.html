@@ -241,26 +241,27 @@
                                         <table class="table table-striped table-hover" id="itemTable">
                                             <thead>
                                                 <tr>
-                                                    <th style="width: 5%;">SN</th>
-                                                    <th style="width: 10%;">Item Code</th>
-                                                    <th style="width: 10%;">CMS Code</th>
-                                                    <th style="width: 15%;">Item Description</th>
+                                                    <th style="width: 4%;">SN</th>
+                                                    <th style="width: 12%;">Item Code</th>
+                                                    <th style="width: 12%;">CMS Code</th>
+                                                    <th style="width: 20%;">Item Description</th>
                                                     <th style="width: 5%;">Quantity</th>
-                                                    <th style="width: 5%;">UOM</th>
-                                                    <th style="width: 7%;" class="currency-header">Cost (<span class="currency-placeholder">OC</span>/unit)</th>
-                                                    <th style="width: 7%;" class="currency-header">Discounted Cost (<span class="currency-placeholder">OC</span>/unit)</th>
-                                                    <th style="width: 7%;" class="currency-header">Total Cost (<span class="currency-placeholder">OC</span>)</th>
-                                                    <th style="width: 7%;">Total Cost (KD)</th>
-                                                    <th style="width: 5%;">Freight Charges</th>
-                                                    <th style="width: 5%;">Cost of Money</th>
-                                                    <th style="width: 5%;">Clearing Charges</th>
-                                                    <th style="width: 5%;">Custom Charges</th>
-                                                    <th style="width: 7%;">Total Landed Cost</th>
-                                                    <th style="width: 7%;">Landed Cost (KD/unit)</th>
-                                                    <th style="width: 7%;" class="currency-header">Landed Cost (<span class="currency-placeholder">OC</span>/unit)</th>
-                                                    <th style="width: 7%;" class="currency-header">Sale Price (<span class="currency-placeholder">OC</span>/unit)</th>
-                                                    <th style="width: 7%;" class="currency-header">Total Sale Value (<span class="currency-placeholder">OC</span>)</th>
-                                                    <th style="width: 5%;">Action</th>
+                                                    <th style="width: 7%;">UOM</th>
+                                                    <th style="width: 10%;" class="currency-header">Cost (<span class="currency-placeholder">OC</span>/unit)</th>
+                                                    <th style="width: 10%;" class="currency-header">Discounted Cost (<span class="currency-placeholder">OC</span>/unit)</th>
+                                                    <th style="width: 10%;" class="currency-header">Total Cost (<span class="currency-placeholder">OC</span>)</th>
+                                                    <th style="width: 10%;">Total Cost (KWD)</th>
+                                                    <th style="width: 7%;">Freight Charges (KWD)</th>
+                                                    <th style="width: 7%;">Cost of Money (KWD)</th>
+                                                    <th style="width: 7%;">Clearing Charges (KWD)</th>
+                                                    <th style="width: 7%;">Custom Charges (KWD)</th>
+                                                    <th style="width: 10%;">Total Landed Cost (KWD)</th>
+                                                    <th style="width: 10%;">Landed Cost (KWD/unit)</th>
+                                                    <th style="width: 10%;" class="currency-header">Landed Cost (<span class="currency-placeholder">OC</span>/unit)</th>
+                                                    <th style="width: 10%;" class="currency-header">Sale Price (<span class="currency-placeholder">OC</span>/unit)</th>
+                                                    <th style="width: 10%;" class="currency-header">Total Sale Value (<span class="currency-placeholder">OC</span>)</th>
+                                                    <th style="width: 10%;">Total Sale Value (KWD)</th>
+                                                    <th style="width: 7%;">Action</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -285,32 +286,36 @@
                             <div class="card-body">
                                 <div class="row g-3">
                                     <div class="col-md-4">
-                                        <label class="form-label">Total Cost</label>
+                                        <label class="form-label">Total Cost (<span class="currency-placeholder">OC</span>)</label>
                                         <input type="text" class="form-control form-control-sm" id="totalCost" disabled>
                                     </div>
                                     <div class="col-md-4">
-                                        <label class="form-label">Total Cost (KD)</label>
+                                        <label class="form-label">Total Cost (KWD)</label>
                                         <input type="text" class="form-control form-control-sm" id="totalCostKD" disabled>
                                     </div>
                                     <div class="col-md-4">
-                                        <label class="form-label">Total Cost of Money</label>
+                                        <label class="form-label">Total Cost of Money (KWD)</label>
                                         <input type="text" class="form-control form-control-sm" id="totalCostOfMoney" disabled>
                                     </div>
                                     <div class="col-md-4">
-                                        <label class="form-label">Total Clearing Charges</label>
+                                        <label class="form-label">Total Clearing Charges (KWD)</label>
                                         <input type="text" class="form-control form-control-sm" id="totalClearingCharges" disabled>
                                     </div>
                                     <div class="col-md-4">
-                                        <label class="form-label">Total Custom Charges</label>
+                                        <label class="form-label">Total Custom Charges (KWD)</label>
                                         <input type="text" class="form-control form-control-sm" id="totalCustomCharges" disabled>
                                     </div>
                                     <div class="col-md-4">
-                                        <label class="form-label">Total Landed Cost</label>
+                                        <label class="form-label">Total Landed Cost (KWD)</label>
                                         <input type="text" class="form-control form-control-sm" id="totalLandedCost" disabled>
                                     </div>
-                                    <div class="col-md-4"></div>
-                                        <label class="form-label">Total Sales Value</label>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Total Sales Value (<span class="currency-placeholder">OC</span>)</label>
                                         <input type="text" class="form-control form-control-sm" id="totalSalesValue" disabled>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Total Sales Value (KWD)</label>
+                                        <input type="text" class="form-control form-control-sm" id="totalSalesValueKWD" disabled>
                                     </div>
                                 </div>
                             </div>
