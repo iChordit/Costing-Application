@@ -183,6 +183,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <td><input type="number" class="form-control form-control-sm custom-charges readonly-input" readonly></td>
             <td><input type="number" class="form-control form-control-sm total-landed-cost readonly-input" readonly></td>
             <td><input type="number" class="form-control form-control-sm unit-landed-cost-kd readonly-input" readonly></td>
+            <td><input type="number" class="form-control form-control-sm unit-landed-cost-oc readonly-input" readonly></td>
             <td><input type="number" class="form-control form-control-sm sale-price" value="0" step="0.01"></td>
             <td><input type="number" class="form-control form-control-sm total-sale-value readonly-input" readonly></td>
             <td><button type="button" class="btn btn-danger btn-sm delete-row">X</button></td>
@@ -274,6 +275,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         let totalLandedCost = 0;
+        const exchangeRate = parseFloat(document.getElementById('exchangeRate').value) || 1;
 
         // Second pass: update line freight charges, clearing charges, and total landed cost
         rows.forEach(row => {
@@ -293,8 +295,9 @@ document.addEventListener('DOMContentLoaded', function() {
             // Calculate and update Unit Landed Cost (KD)
             const quantity = parseFloat(row.querySelector('.item-quantity').value) || 1;
             const unitLandedCostKD = quantity > 0 ? rowLandedCost / quantity : 0;
+            const unitLandedCostOC = unitLandedCostKD / exchangeRate;
             row.querySelector('.unit-landed-cost-kd').value = unitLandedCostKD.toFixed(4);
-
+            row.querySelector('.unit-landed-cost-oc').value = unitLandedCostOC.toFixed(4);
             totalLandedCost += rowLandedCost;
 
             console.log(`Detailed calculation:
@@ -309,6 +312,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 Custom Charges: ${customCharges}
                 Total Landed Cost: ${rowLandedCost}
                 Unit Landed Cost (KD): ${unitLandedCostKD}
+                Unit Landed Cost (OC): ${unitLandedCostOC}
+                Exchange Rate: ${exchangeRate}
             `);
         });
 
@@ -320,6 +325,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('totalCustomCharges').value = formatNumber(totalCustomCharges, 2);
         document.getElementById('totalLandedCost').value = formatNumber(totalLandedCost, 2);
         document.getElementById('totalSalesValue').value = formatNumber(totalSalesValue, 2);
+
     }
 
     // Add event listeners to the item table
