@@ -116,7 +116,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const totalCostKD = totalCost * exchangeRate;
         const totalCostOfMoney = totalCostKD * costOfMoney / 100;
         const totalCustomCharges = totalCostKD * customCharges / 100;
-        const totalSalesValue = salePrice * quantity;
+        const sellInOriginalCurrency = document.getElementById('sellOriginalCurrency').checked;
+        const totalSalesValue = sellInOriginalCurrency ? salePrice * quantity : (salePrice * quantity) / exchangeRate;
 
         row.querySelector('.item-discounted-cost').value = discountedCost.toFixed(4);
         row.querySelector('.item-total-cost').value = totalCost.toFixed(4);
@@ -387,4 +388,104 @@ document.addEventListener('DOMContentLoaded', function() {
     setupNumericInput('totalCustomCharges', 2);
     setupNumericInput('totalLandedCost', 2);
     setupNumericInput('totalSalesValue', 2);
+
+    // Add this new function to set up the table layout
+    function setupTableLayout() {
+        const table = document.getElementById('itemTable');
+        const headerRow = table.querySelector('thead tr');
+        const columnWidths = [
+            '50px',  // #
+            '100px', // Item Code
+            '100px', // CMS Code
+            '200px', // Item Description
+            '80px',  // Quantity
+            '100px', // UOM
+            '100px', // Cost
+            '100px', // Discounted Cost
+            '100px', // Total Cost
+            '100px', // Total Cost KD
+            '100px', // Freight Charges
+            '100px', // Cost of Money
+            '100px', // Clearing Charges
+            '100px', // Custom Charges
+            '100px', // Total Landed Cost
+            '100px', // Unit Landed Cost KD
+            '100px', // Unit Landed Cost OC
+            '100px', // Sale Price
+            '100px', // Total Sale Value
+            '50px'   // Delete button
+        ];
+
+        headerRow.querySelectorAll('th').forEach((th, index) => {
+            th.style.width = columnWidths[index];
+            th.style.minWidth = columnWidths[index];
+        });
+
+        // Add a container div around the table for scrolling
+        const tableWrapper = document.createElement('div');
+        tableWrapper.style.overflowX = 'auto';
+        tableWrapper.style.maxWidth = '100%';
+        table.parentNode.insertBefore(tableWrapper, table);
+        tableWrapper.appendChild(table);
+
+        // Set table layout to fixed
+        table.style.tableLayout = 'fixed';
+        table.style.width = columnWidths.reduce((sum, width) => sum + parseInt(width), 0) + 'px';
+    }
+
+    // Call the setupTableLayout function after the DOM is loaded
+    setupTableLayout();
+
+    const sellOriginalCurrencyCheckbox = document.getElementById('sellOriginalCurrency');
+    const salePriceHeader = document.querySelector('#itemTable th:nth-child(18)'); // Adjust this selector if needed
+
+    function updateSalePriceHeader() {
+        if (sellOriginalCurrencyCheckbox.checked) {
+            salePriceHeader.textContent = 'Sale Price ('+document.getElementById('currency').value+'/unit)';
+        } else {
+            salePriceHeader.textContent = 'Sale Price (KD/unit)';
+        }
+        updateAllRows();
+    }
+
+    function updateLandedCostHighlight() {
+        const isChecked = sellOriginalCurrencyCheckbox.checked;
+        const landedCostKDCells = document.querySelectorAll('#itemTable .unit-landed-cost-kd');
+        const landedCostOCCells = document.querySelectorAll('#itemTable .unit-landed-cost-oc');
+        
+        landedCostKDCells.forEach(cell => {
+            if (isChecked) {
+                cell.classList.remove('highlight-kd');
+            } else {
+                cell.classList.add('highlight-kd');
+            }
+        });
+
+        landedCostOCCells.forEach(cell => {
+            if (isChecked) {
+                cell.classList.add('highlight-kd');
+            } else {
+                cell.classList.remove('highlight-kd');
+            }
+        });
+
+        updateSalePriceHeader(); // Call this function to update the header
+    }
+
+    sellOriginalCurrencyCheckbox.addEventListener('change', updateLandedCostHighlight);
+
+    // Call updateLandedCostHighlight initially to set the correct state on page load
+    updateLandedCostHighlight();
+
+    const currencySelect = document.getElementById('currency');
+    const currencyPlaceholders = document.querySelectorAll('.currency-placeholder');
+
+    currencySelect.addEventListener('change', function() {
+        const selectedCurrency = this.value || 'OC';
+        currencyPlaceholders.forEach(placeholder => {
+            placeholder.textContent = selectedCurrency;
+        });
+        updateSalePriceHeader();
+    });
+    updateAllRows();
 });

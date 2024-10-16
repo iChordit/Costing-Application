@@ -163,16 +163,41 @@ button:hover {
 }
 
 /* Add this to your styles.css file */
-#itemTable input[type="number"],
-#itemTable input[type="text"] {
-    width: 100%;
-    min-width: 80px;
+#itemTable {
+    border-collapse: separate;
+    border-spacing: 0;
 }
 
 #itemTable th,
 #itemTable td {
-    padding: 0.25rem;
-    vertical-align: middle;
+    padding: 5px;
+    border: 1px solid #ddd;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#itemTable th {
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: normal; /* Allow text to wrap */
+    height: 50px; /* Set a fixed height for the header */
+    vertical-align: middle; /* Vertically center the text */
+    line-height: 1.2; /* Adjust line height for better readability */
+    padding: 5px 3px; /* Adjust padding to give some space around the text */
+}
+
+#itemTable thead {
+    position: sticky;
+    top: 0;
+    background-color: #f8f9fa;
+    z-index: 1;
+}
+
+#itemTable tbody td input,
+#itemTable tbody td select {
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .readonly-input {
@@ -347,4 +372,9 @@ header {
     font-size: 0.875rem;
     line-height: 1.5;
     border-radius: 0.2rem;
+}
+
+.highlight-kd {
+    background-color: #fffacd; /* Light yellow background */
+    font-weight: bold;
 }
