@@ -108,6 +108,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const discount = parseFloat(document.getElementById('discount').value) || 0;
         const exchangeRate = parseFloat(document.getElementById('exchangeRate').value) || 1;
         const costOfMoney = parseFloat(document.getElementById('costOfMoney').value) || 0;
+        const salePrice = parseFloat(row.querySelector('.sale-price').value) || 0;
         const customCharges = parseFloat(document.getElementById('customChargesPercentage').value) || 0;
 
         const discountedCost = cost * (1 - discount / 100);
@@ -115,12 +116,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const totalCostKD = totalCost * exchangeRate;
         const totalCostOfMoney = totalCostKD * costOfMoney / 100;
         const totalCustomCharges = totalCostKD * customCharges / 100;
+        const totalSalesValue = salePrice * quantity;
 
         row.querySelector('.item-discounted-cost').value = discountedCost.toFixed(4);
         row.querySelector('.item-total-cost').value = totalCost.toFixed(4);
         row.querySelector('.item-total-cost-kd').value = totalCostKD.toFixed(4);
         row.querySelector('.cost-of-money').value = totalCostOfMoney.toFixed(4);
         row.querySelector('.custom-charges').value = totalCustomCharges.toFixed(4);
+        row.querySelector('.total-sale-value').value = totalSalesValue.toFixed(4);
 
         // We'll calculate the line freight charge and clearing charges in the updateTotals function
 
@@ -180,6 +183,8 @@ document.addEventListener('DOMContentLoaded', function() {
             <td><input type="number" class="form-control form-control-sm custom-charges readonly-input" readonly></td>
             <td><input type="number" class="form-control form-control-sm total-landed-cost readonly-input" readonly></td>
             <td><input type="number" class="form-control form-control-sm unit-landed-cost-kd readonly-input" readonly></td>
+            <td><input type="number" class="form-control form-control-sm sale-price" value="0" step="0.01"></td>
+            <td><input type="number" class="form-control form-control-sm total-sale-value readonly-input" readonly></td>
             <td><button type="button" class="btn btn-danger btn-sm delete-row">X</button></td>
         `;
         rowCounter++;
@@ -188,6 +193,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const costInput = newRow.querySelector('.item-cost');
         const deleteBtn = newRow.querySelector('.delete-row');
         const uomSelect = newRow.querySelector('.item-uom');
+        const saleInput = newRow.querySelector('.sale-price');
 
         // Populate UOM dropdown
         populateUOMOptions(uomSelect);
@@ -202,6 +208,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         deleteBtn.addEventListener('click', () => {
             deleteRow(newRow);
+            updateTotals();
+        });
+        saleInput.addEventListener('input', () => {
+            updateRowCalculations(newRow);
             updateTotals();
         });
 
@@ -231,6 +241,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let totalCostKD = 0;
         let totalCostOfMoney = 0;
         let totalCustomCharges = 0;
+        let totalSalesValue = 0;
         const rows = document.querySelectorAll('#itemTable tbody tr');
         const freight = parseFloat(document.getElementById('freightValue').value) || 0;
         const clearingCharges = parseFloat(document.getElementById('clearingCharges').value) || 0;
@@ -243,10 +254,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const totalCostKDForRow = parseFloat(row.querySelector('.item-total-cost-kd').value) || 0;
             const costOfMoneyForRow = parseFloat(row.querySelector('.cost-of-money').value) || 0;
             const customChargesForRow = parseFloat(row.querySelector('.custom-charges').value) || 0;
+            const totalSalesValueForRow = parseFloat(row.querySelector('.total-sale-value').value) || 0;
             totalCost += totalCostForRow;
             totalCostKD += totalCostKDForRow;
             totalCostOfMoney += costOfMoneyForRow;
             totalCustomCharges += customChargesForRow;
+            totalSalesValue += totalSalesValueForRow;
         });
 
         // Calculate total clearing charges based on the selected template
@@ -306,6 +319,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('totalClearingCharges').value = formatNumber(totalClearingCharges, 2);
         document.getElementById('totalCustomCharges').value = formatNumber(totalCustomCharges, 2);
         document.getElementById('totalLandedCost').value = formatNumber(totalLandedCost, 2);
+        document.getElementById('totalSalesValue').value = formatNumber(totalSalesValue, 2);
     }
 
     // Add event listeners to the item table
@@ -366,4 +380,5 @@ document.addEventListener('DOMContentLoaded', function() {
     setupNumericInput('totalClearingCharges', 2);
     setupNumericInput('totalCustomCharges', 2);
     setupNumericInput('totalLandedCost', 2);
+    setupNumericInput('totalSalesValue', 2);
 });

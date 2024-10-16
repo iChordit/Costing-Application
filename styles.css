@@ -339,3 +339,12 @@ header {
 .row > .col-md-4 {
     margin-bottom: 15px;
 }
+
+/* Style for the Add Row button */
+#addRowBtn {
+    width: auto;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    border-radius: 0.2rem;
+}
