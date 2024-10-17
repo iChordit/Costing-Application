@@ -120,6 +120,16 @@ document.addEventListener('DOMContentLoaded', function() {
         const totalSalesValue = sellInOriginalCurrency ? salePrice * quantity : (salePrice * quantity) / exchangeRate;
         const totalSalesValueKWD = sellInOriginalCurrency ? totalSalesValue * exchangeRate : salePrice * quantity;
 
+        // Calculate unit landed cost in original currency
+        const freightCharges = parseFloat(row.querySelector('.freight-charges').value) || 0;
+        const clearingCharges = parseFloat(row.querySelector('.clearing-charges').value) || 0;
+        const totalLandedCost = totalCostKD + freightCharges + totalCostOfMoney + clearingCharges + totalCustomCharges;
+        const unitLandedCostKD = quantity > 0 ? totalLandedCost / quantity : 0;
+        const unitLandedCostOC = unitLandedCostKD / exchangeRate;
+
+        // Calculate GP
+        const gp = totalSalesValue - (unitLandedCostOC * quantity);
+
         row.querySelector('.item-discounted-cost').value = discountedCost.toFixed(4);
         row.querySelector('.item-total-cost').value = totalCost.toFixed(4);
         row.querySelector('.item-total-cost-kd').value = totalCostKD.toFixed(4);
@@ -127,13 +137,16 @@ document.addEventListener('DOMContentLoaded', function() {
         row.querySelector('.custom-charges').value = totalCustomCharges.toFixed(4);
         row.querySelector('.total-sale-value').value = totalSalesValue.toFixed(4);
         row.querySelector('.total-sale-value-kwd').value = totalSalesValueKWD.toFixed(4);
+        row.querySelector('.unit-landed-cost-kd').value = unitLandedCostKD.toFixed(4);
+        row.querySelector('.unit-landed-cost-oc').value = unitLandedCostOC.toFixed(4);
+        row.querySelector('.gp').value = gp.toFixed(4);
 
-        // We'll calculate the line freight charge and clearing charges in the updateTotals function
-
-        console.log(`Row updated: Quantity: ${quantity}, Cost: ${cost}, Discounted Cost: ${discountedCost.toFixed(4)}, Total Cost: ${totalCost.toFixed(4)}, Total Cost KD: ${totalCostKD.toFixed(4)}, Cost of Money: ${totalCostOfMoney.toFixed(4)}, Custom Charges: ${totalCustomCharges.toFixed(4)}`);
-
-        // After updating the row, call updateTotals
-        updateTotals();
+        console.log(`Row calculation details:
+            Quantity: ${quantity}
+            Unit Landed Cost (OC): ${unitLandedCostOC.toFixed(4)}
+            Total Sales Value: ${totalSalesValue.toFixed(4)}
+            GP Calculation: ${totalSalesValue.toFixed(4)} - (${unitLandedCostOC.toFixed(4)} * ${quantity}) = ${gp.toFixed(4)}
+        `);
     }
 
     // Function to update all rows
@@ -190,6 +203,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <td><input type="number" class="form-control form-control-sm sale-price" value="0" step="0.01"></td>
             <td><input type="number" class="form-control form-control-sm total-sale-value readonly-input" readonly></td>
             <td><input type="number" class="form-control form-control-sm total-sale-value-kwd readonly-input" readonly></td>
+            <td><input type="number" class="form-control form-control-sm gp readonly-input" readonly></td>
             <td><button type="button" class="btn btn-danger btn-sm delete-row">X</button></td>
         `;
         rowCounter++;
@@ -248,6 +262,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let totalCustomCharges = 0;
         let totalSalesValue = 0;
         let totalSalesValueKWD = 0;
+        let totalGrossProfit = 0;
         const rows = document.querySelectorAll('#itemTable tbody tr');
         const freight = parseFloat(document.getElementById('freightValue').value) || 0;
         const clearingCharges = parseFloat(document.getElementById('clearingCharges').value) || 0;
@@ -262,6 +277,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const customChargesForRow = parseFloat(row.querySelector('.custom-charges').value) || 0;
             const totalSalesValueForRow = parseFloat(row.querySelector('.total-sale-value').value) || 0;
             const totalSalesValueKWDForRow = parseFloat(row.querySelector('.total-sale-value-kwd').value) || 0;
+            
             totalCost += totalCostForRow;
             totalCostKD += totalCostKDForRow;
             totalCostOfMoney += costOfMoneyForRow;
@@ -289,7 +305,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const totalCostKDForRow = parseFloat(row.querySelector('.item-total-cost-kd').value) || 0;
             const lineFreightCharge = totalCostKD > 0 ? (totalCostKDForRow / totalCostKD) * freight : 0;
             const lineClearingCharge = totalCostKD > 0 ? (totalCostKDForRow / totalCostKD) * totalClearingCharges : 0;
-            
             row.querySelector('.freight-charges').value = lineFreightCharge.toFixed(4);
             row.querySelector('.clearing-charges').value = lineClearingCharge.toFixed(4);
 
@@ -299,28 +314,26 @@ document.addEventListener('DOMContentLoaded', function() {
             const rowLandedCost = totalCostKDForRow + lineFreightCharge + costOfMoney + lineClearingCharge + customCharges;
             row.querySelector('.total-landed-cost').value = rowLandedCost.toFixed(4);
 
-            // Calculate and update Unit Landed Cost (KD)
+            // Calculate and update Unit Landed Cost (KD and OC)
             const quantity = parseFloat(row.querySelector('.item-quantity').value) || 1;
             const unitLandedCostKD = quantity > 0 ? rowLandedCost / quantity : 0;
             const unitLandedCostOC = unitLandedCostKD / exchangeRate;
             row.querySelector('.unit-landed-cost-kd').value = unitLandedCostKD.toFixed(4);
             row.querySelector('.unit-landed-cost-oc').value = unitLandedCostOC.toFixed(4);
+            
+            // Calculate GP
+            const totalSalesValueForRow = parseFloat(row.querySelector('.total-sale-value').value) || 0;
+            const gp = totalSalesValueForRow - (unitLandedCostOC * quantity);
+            row.querySelector('.gp').value = gp.toFixed(4);
+            
             totalLandedCost += rowLandedCost;
+            totalGrossProfit += gp;
 
-            console.log(`Detailed calculation:
+            console.log(`Row GP calculation:
+                Total Sales Value: ${totalSalesValueForRow.toFixed(4)}
+                Unit Landed Cost (OC): ${unitLandedCostOC.toFixed(4)}
                 Quantity: ${quantity}
-                Cost: ${parseFloat(row.querySelector('.item-cost').value) || 0}
-                Discounted Cost: ${parseFloat(row.querySelector('.item-discounted-cost').value) || 0}
-                Total Cost: ${totalCostKDForRow}
-                Total Cost KD: ${totalCostKDForRow}
-                Freight Charges: ${lineFreightCharge}
-                Cost of Money: ${costOfMoney}
-                Clearing Charges: ${lineClearingCharge}
-                Custom Charges: ${customCharges}
-                Total Landed Cost: ${rowLandedCost}
-                Unit Landed Cost (KD): ${unitLandedCostKD}
-                Unit Landed Cost (OC): ${unitLandedCostOC}
-                Exchange Rate: ${exchangeRate}
+                GP: ${gp.toFixed(4)}
             `);
         });
 
@@ -333,7 +346,9 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('totalLandedCost').value = formatNumber(totalLandedCost, 2);
         document.getElementById('totalSalesValue').value = formatNumber(totalSalesValue, 2);
         document.getElementById('totalSalesValueKWD').value = formatNumber(totalSalesValueKWD, 2);
-
+        document.getElementById('totalGrossProfit').value = formatNumber(totalGrossProfit, 2);
+        
+        console.log(`Total Gross Profit: ${totalGrossProfit.toFixed(4)}`);
     }
 
     // Add event listeners to the item table
@@ -422,6 +437,7 @@ document.addEventListener('DOMContentLoaded', function() {
             '100px', // Sale Price
             '100px', // Total Sale Value
             '100px', // Total Sale Value (KWD)
+            '100px', // GP
             '50px'   // Delete button
         ];
 
@@ -454,6 +470,11 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             salePriceHeader.textContent = 'Sale Price (KWD/unit)';
         }
+        
+        // Update GP header
+        const gpHeader = document.querySelector('#itemTable th:nth-child(21)'); // Adjust this selector if needed
+        gpHeader.textContent = 'GP (' + document.getElementById('currency').value + ')';
+        
         updateAllRows();
     }
 
