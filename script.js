@@ -152,7 +152,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Function to update all rows
     function updateAllRows() {
         const rows = itemTable.querySelectorAll('tbody tr');
-        rows.forEach(updateRowCalculations);
+        rows.forEach(row => {
+            updateRowCalculations(row);
+        });
+        updateTotals();
     }
 
     // Add event listeners
@@ -363,7 +366,10 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('freightValue').addEventListener('input', updateTotals);
     
     // Add event listener for clearance fees template changes
-    document.getElementById('clearanceFeesTemplate').addEventListener('change', updateAllRows);
+    document.getElementById('clearanceFeesTemplate').addEventListener('change', function() {
+        updateAllRows();
+        updateTotals();
+    });
     document.getElementById('containers').addEventListener('input', updateAllRows);
 
     // Update event listeners
