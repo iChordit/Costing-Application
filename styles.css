@@ -378,3 +378,9 @@ header {
     background-color: #fffacd; /* Light yellow background */
     font-weight: bold;
 }
+
+.show-details {
+    width: 100%;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+}

@@ -196,10 +196,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <td><input type="number" class="form-control form-control-sm item-discounted-cost readonly-input" readonly></td>
             <td><input type="number" class="form-control form-control-sm item-total-cost readonly-input" readonly></td>
             <td><input type="number" class="form-control form-control-sm item-total-cost-kd readonly-input" readonly></td>
-            <td><input type="number" class="form-control form-control-sm freight-charges readonly-input" readonly></td>
-            <td><input type="number" class="form-control form-control-sm cost-of-money readonly-input" readonly></td>
-            <td><input type="number" class="form-control form-control-sm clearing-charges readonly-input" readonly></td>
-            <td><input type="number" class="form-control form-control-sm custom-charges readonly-input" readonly></td>
+            <td><button type="button" class="btn btn-info btn-sm show-details">Details</button></td>
             <td><input type="number" class="form-control form-control-sm total-landed-cost readonly-input" readonly></td>
             <td><input type="number" class="form-control form-control-sm unit-landed-cost-kd readonly-input" readonly></td>
             <td><input type="number" class="form-control form-control-sm unit-landed-cost-oc readonly-input" readonly></td>
@@ -208,6 +205,10 @@ document.addEventListener('DOMContentLoaded', function() {
             <td><input type="number" class="form-control form-control-sm total-sale-value-kwd readonly-input" readonly></td>
             <td><input type="number" class="form-control form-control-sm gp readonly-input" readonly></td>
             <td><button type="button" class="btn btn-danger btn-sm delete-row">X</button></td>
+            <input type="hidden" class="freight-charges">
+            <input type="hidden" class="cost-of-money">
+            <input type="hidden" class="clearing-charges">
+            <input type="hidden" class="custom-charges">
         `;
         rowCounter++;
 
@@ -216,6 +217,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const deleteBtn = newRow.querySelector('.delete-row');
         const uomSelect = newRow.querySelector('.item-uom');
         const saleInput = newRow.querySelector('.sale-price');
+        const detailsBtn = newRow.querySelector('.show-details');
 
         // Populate UOM dropdown
         populateUOMOptions(uomSelect);
@@ -236,6 +238,7 @@ document.addEventListener('DOMContentLoaded', function() {
             updateRowCalculations(newRow);
             updateTotals();
         });
+        detailsBtn.addEventListener('click', () => showDetails(newRow));
 
         updateRowCalculations(newRow);
         console.log("New row added. Total rows:", itemTable.querySelectorAll('tbody tr').length);
@@ -468,60 +471,73 @@ document.addEventListener('DOMContentLoaded', function() {
     setupTableLayout();
 
     const sellOriginalCurrencyCheckbox = document.getElementById('sellOriginalCurrency');
-    const salePriceHeader = document.querySelector('#itemTable th:nth-child(18)'); // Adjust this selector if needed
+    const currencySelect = document.getElementById('currency');
 
     function updateSalePriceHeader() {
-        if (sellOriginalCurrencyCheckbox.checked) {
-            salePriceHeader.textContent = 'Sale Price ('+document.getElementById('currency').value+'/unit)';
-        } else {
-            salePriceHeader.textContent = 'Sale Price (KWD/unit)';
+        const salePriceHeader = itemTable.querySelector('th:nth-child(15)'); // Adjust this selector if needed
+        const gpHeader = itemTable.querySelector('th:nth-child(18)'); // Adjust this selector if needed
+        
+        if (salePriceHeader && gpHeader) {
+            const currencyValue = currencySelect.value || 'OC';
+            if (sellOriginalCurrencyCheckbox.checked) {
+                salePriceHeader.textContent = `Sale Price (${currencyValue}/unit)`;
+            } else {
+                salePriceHeader.textContent = 'Sale Price (KWD/unit)';
+            }
+            gpHeader.textContent = `GP (${currencyValue})`;
         }
-        
-        // Update GP header
-        const gpHeader = document.querySelector('#itemTable th:nth-child(21)'); // Adjust this selector if needed
-        gpHeader.textContent = 'GP (' + document.getElementById('currency').value + ')';
-        
-        updateAllRows();
     }
 
     function updateLandedCostHighlight() {
+        if (!itemTable) return; // Exit if itemTable doesn't exist
+
         const isChecked = sellOriginalCurrencyCheckbox.checked;
-        const landedCostKDCells = document.querySelectorAll('#itemTable .unit-landed-cost-kd');
-        const landedCostOCCells = document.querySelectorAll('#itemTable .unit-landed-cost-oc');
+        const landedCostKDCells = itemTable.querySelectorAll('.unit-landed-cost-kd');
+        const landedCostOCCells = itemTable.querySelectorAll('.unit-landed-cost-oc');
         
         landedCostKDCells.forEach(cell => {
-            if (isChecked) {
-                cell.classList.remove('highlight-kd');
-            } else {
-                cell.classList.add('highlight-kd');
-            }
+            cell.classList.toggle('highlight-kd', !isChecked);
         });
 
         landedCostOCCells.forEach(cell => {
-            if (isChecked) {
-                cell.classList.add('highlight-kd');
-            } else {
-                cell.classList.remove('highlight-kd');
-            }
+            cell.classList.toggle('highlight-kd', isChecked);
         });
 
-        updateSalePriceHeader(); // Call this function to update the header
+        updateSalePriceHeader();
     }
 
-    sellOriginalCurrencyCheckbox.addEventListener('change', updateLandedCostHighlight);
+    if (sellOriginalCurrencyCheckbox) {
+        sellOriginalCurrencyCheckbox.addEventListener('change', updateLandedCostHighlight);
+    }
 
-    // Call updateLandedCostHighlight initially to set the correct state on page load
-    updateLandedCostHighlight();
-
-    const currencySelect = document.getElementById('currency');
-    const currencyPlaceholders = document.querySelectorAll('.currency-placeholder');
-
-    currencySelect.addEventListener('change', function() {
-        const selectedCurrency = this.value || 'OC';
-        currencyPlaceholders.forEach(placeholder => {
-            placeholder.textContent = selectedCurrency;
+    if (currencySelect) {
+        currencySelect.addEventListener('change', function() {
+            const selectedCurrency = this.value || 'OC';
+            document.querySelectorAll('.currency-placeholder').forEach(placeholder => {
+                placeholder.textContent = selectedCurrency;
+            });
+            updateSalePriceHeader();
         });
+    }
+
+    // Only call these functions if all required elements exist
+    if (sellOriginalCurrencyCheckbox && currencySelect && itemTable) {
+        updateLandedCostHighlight();
         updateSalePriceHeader();
-    });
-    updateAllRows();
+    }
+
+    function showDetails(row) {
+        const freightCharges = row.querySelector('.freight-charges').value;
+        const costOfMoney = row.querySelector('.cost-of-money').value;
+        const clearingCharges = row.querySelector('.clearing-charges').value;
+        const customCharges = row.querySelector('.custom-charges').value;
+
+        document.getElementById('modalFreightCharges').textContent = freightCharges;
+        document.getElementById('modalCostOfMoney').textContent = costOfMoney;
+        document.getElementById('modalClearingCharges').textContent = clearingCharges;
+        document.getElementById('modalCustomCharges').textContent = customCharges;
+
+        const detailsModal = new bootstrap.Modal(document.getElementById('detailsModal'));
+        detailsModal.show();
+    }
 });

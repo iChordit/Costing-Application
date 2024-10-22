@@ -251,10 +251,7 @@
                                                     <th style="width: 10%;" class="currency-header">Discounted Cost (<span class="currency-placeholder">OC</span>/unit)</th>
                                                     <th style="width: 10%;" class="currency-header">Total Cost (<span class="currency-placeholder">OC</span>)</th>
                                                     <th style="width: 10%;">Total Cost (KWD)</th>
-                                                    <th style="width: 7%;">Freight Charges (KWD)</th>
-                                                    <th style="width: 7%;">Cost of Money (KWD)</th>
-                                                    <th style="width: 7%;">Clearing Charges (KWD)</th>
-                                                    <th style="width: 7%;">Custom Charges (KWD)</th>
+                                                    <th style="width: 10%;">Details</th>
                                                     <th style="width: 10%;">Total Landed Cost (KWD)</th>
                                                     <th style="width: 10%;">Landed Cost (KWD/unit)</th>
                                                     <th style="width: 10%;" class="currency-header">Landed Cost (<span class="currency-placeholder">OC</span>/unit)</th>
@@ -341,5 +338,26 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
     <script src="script.js"></script>
+
+    <!-- Add this modal at the end of the body -->
+    <div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detailsModalLabel">Item Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Freight Charges (KWD):</strong> <span id="modalFreightCharges"></span></p>
+                    <p><strong>Cost of Money (KWD):</strong> <span id="modalCostOfMoney"></span></p>
+                    <p><strong>Clearing Charges (KWD):</strong> <span id="modalClearingCharges"></span></p>
+                    <p><strong>Custom Charges (KWD):</strong> <span id="modalCustomCharges"></span></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
