@@ -110,13 +110,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const costOfMoney = parseFloat(document.getElementById('costOfMoney').value) || 0;
         const salePrice = parseFloat(row.querySelector('.sale-price').value) || 0;
         const customCharges = parseFloat(document.getElementById('customChargesPercentage').value) || 0;
+        const sellInOriginalCurrency = document.getElementById('sellOriginalCurrency').checked;
 
         const discountedCost = cost * (1 - discount / 100);
         const totalCost = discountedCost * quantity;
         const totalCostKD = totalCost * exchangeRate;
         const totalCostOfMoney = totalCostKD * costOfMoney / 100;
         const totalCustomCharges = totalCostKD * customCharges / 100;
-        const sellInOriginalCurrency = document.getElementById('sellOriginalCurrency').checked;
         const totalSalesValue = sellInOriginalCurrency ? salePrice * quantity : (salePrice * quantity) / exchangeRate;
         const totalSalesValueKWD = sellInOriginalCurrency ? totalSalesValue * exchangeRate : salePrice * quantity;
 
@@ -539,5 +539,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const detailsModal = new bootstrap.Modal(document.getElementById('detailsModal'));
         detailsModal.show();
+    }
+
+    // Add this new function
+    function updateSellCurrency() {
+        updateAllRows();
+        updateTotals();
+        updateSalePriceHeader();
+        updateLandedCostHighlight();
+    }
+
+    // Update the event listener for the checkbox
+    if (sellOriginalCurrencyCheckbox) {
+        sellOriginalCurrencyCheckbox.addEventListener('change', updateSellCurrency);
     }
 });
