@@ -129,6 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Calculate GP
         const gp = totalSalesValue - (unitLandedCostOC * quantity);
+        const gpKWD = totalSalesValueKWD - totalLandedCost;
 
         row.querySelector('.item-discounted-cost').value = discountedCost.toFixed(4);
         row.querySelector('.item-total-cost').value = totalCost.toFixed(4);
@@ -140,7 +141,7 @@ document.addEventListener('DOMContentLoaded', function() {
         row.querySelector('.unit-landed-cost-kd').value = unitLandedCostKD.toFixed(4);
         row.querySelector('.unit-landed-cost-oc').value = unitLandedCostOC.toFixed(4);
         row.querySelector('.gp').value = gp.toFixed(4);
-
+        row.querySelector('.gp-kwd').value = gpKWD.toFixed(4);
         console.log(`Row calculation details:
             Quantity: ${quantity}
             Unit Landed Cost (OC): ${unitLandedCostOC.toFixed(4)}
@@ -204,6 +205,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <td><input type="number" class="form-control form-control-sm total-sale-value readonly-input" readonly></td>
             <td><input type="number" class="form-control form-control-sm total-sale-value-kwd readonly-input" readonly></td>
             <td><input type="number" class="form-control form-control-sm gp readonly-input" readonly></td>
+            <td><input type="number" class="form-control form-control-sm gp-kwd readonly-input" readonly></td>
             <td><button type="button" class="btn btn-danger btn-sm delete-row">X</button></td>
             <input type="hidden" class="freight-charges">
             <input type="hidden" class="cost-of-money">
@@ -269,6 +271,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let totalSalesValue = 0;
         let totalSalesValueKWD = 0;
         let totalGrossProfit = 0;
+        let totalGrossProfitKWD = 0;
         const rows = document.querySelectorAll('#itemTable tbody tr');
         const freight = parseFloat(document.getElementById('freightValue').value) || 0;
         const clearingCharges = parseFloat(document.getElementById('clearingCharges').value) || 0;
@@ -330,7 +333,9 @@ document.addEventListener('DOMContentLoaded', function() {
             // Calculate GP
             const totalSalesValueForRow = parseFloat(row.querySelector('.total-sale-value').value) || 0;
             const gp = totalSalesValueForRow - (unitLandedCostOC * quantity);
+            const gpKWD = totalSalesValueForRow - rowLandedCost;
             row.querySelector('.gp').value = gp.toFixed(4);
+            row.querySelector('.gp-kwd').value = (gp * exchangeRate).toFixed(4);
             
             totalLandedCost += rowLandedCost;
             totalGrossProfit += gp;
@@ -447,6 +452,7 @@ document.addEventListener('DOMContentLoaded', function() {
             '100px', // Total Sale Value
             '100px', // Total Sale Value (KWD)
             '100px', // GP
+            '100px', // GP (KWD)
             '50px'   // Delete button
         ];
 
