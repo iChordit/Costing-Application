@@ -34,7 +34,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Toggle visibility of freight value input
     document.getElementById('freightCharges').addEventListener('change', function() {
         document.getElementById('freightValueGroup').style.display = this.checked ? 'block' : 'none';
-        document.getElementById('freightValue').value = 0.0000;
+        document.getElementById('freightValue').value = 0;
+        updateAllRows();
+        updateTotals();
+        updateAllRows();
         updateTotals();
     });
 
@@ -121,9 +124,15 @@ document.addEventListener('DOMContentLoaded', function() {
         const totalSalesValueKWD = sellInOriginalCurrency ? totalSalesValue * exchangeRate : salePrice * quantity;
 
         // Calculate unit landed cost in original currency
-        const freightCharges = parseFloat(row.querySelector('.freight-charges').value) || 0;
-        const clearingCharges = parseFloat(row.querySelector('.clearing-charges').value) || 0;
-        const totalLandedCost = totalCostKD + freightCharges + totalCostOfMoney + clearingCharges + totalCustomCharges;
+        const freightCharges = parseFloat(document.getElementById('freightValue').value) || 0;
+        const clearingCharges = parseFloat(document.getElementById('clearingCharges').value) || 0;
+        const totalCostKDAll = parseFloat(document.getElementById('totalCostKD').value) || 1;
+        
+        // Calculate freight and clearing charges proportionally
+        const totalFreight = freightCharges * (totalCostKD / totalCostKDAll);
+        const totalClearing = clearingCharges * (totalCostKD / totalCostKDAll);
+        
+        const totalLandedCost = totalCostKD + totalFreight + totalCostOfMoney + totalClearing + totalCustomCharges;
         const unitLandedCostKD = quantity > 0 ? totalLandedCost / quantity : 0;
         const unitLandedCostOC = unitLandedCostKD / exchangeRate;
 
@@ -142,11 +151,22 @@ document.addEventListener('DOMContentLoaded', function() {
         row.querySelector('.unit-landed-cost-oc').value = unitLandedCostOC.toFixed(4);
         row.querySelector('.gp').value = gp.toFixed(4);
         row.querySelector('.gp-kwd').value = gpKWD.toFixed(4);
+        row.querySelector('.freight-charges').value = totalFreight.toFixed(4);
+        row.querySelector('.clearing-charges').value = totalClearing.toFixed(4);
+
         console.log(`Row calculation details:
             Quantity: ${quantity}
+            Total Cost KD: ${totalCostKD.toFixed(4)}
+            Total Cost KD (All): ${totalCostKDAll.toFixed(4)}
+            Freight Charges (Total): ${freightCharges}
+            Freight Charges (Row): ${totalFreight}
+            Clearing Charges (Total): ${clearingCharges.toFixed(4)}
+            Clearing Charges (Row): ${totalClearing.toFixed(4)}
+            Unit Landed Cost (KD): ${unitLandedCostKD.toFixed(4)}
             Unit Landed Cost (OC): ${unitLandedCostOC.toFixed(4)}
             Total Sales Value: ${totalSalesValue.toFixed(4)}
-            GP Calculation: ${totalSalesValue.toFixed(4)} - (${unitLandedCostOC.toFixed(4)} * ${quantity}) = ${gp.toFixed(4)}
+            GP: ${gp.toFixed(4)}
+            GP (KWD): ${gpKWD.toFixed(4)}
         `);
     }
 
@@ -167,6 +187,7 @@ document.addEventListener('DOMContentLoaded', function() {
     discountInput.addEventListener('input', updateAllRows);
     exchangeRateInput.addEventListener('input', updateAllRows);
     freightValueInput.addEventListener('input', updateAllRows);
+    console.log("BASHAR FREIGHT VALUE:", freightValueInput.value);
     costOfMoneyInput.addEventListener('input', updateAllRows);
     clearingChargesInput.addEventListener('input', updateAllRows);
     customChargesInput.addEventListener('input', updateAllRows);
@@ -243,6 +264,7 @@ document.addEventListener('DOMContentLoaded', function() {
         detailsBtn.addEventListener('click', () => showDetails(newRow));
 
         updateRowCalculations(newRow);
+        updateAllRows(); // Add this line
         console.log("New row added. Total rows:", itemTable.querySelectorAll('tbody tr').length);
     }
 
@@ -275,6 +297,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const rows = document.querySelectorAll('#itemTable tbody tr');
         const freight = parseFloat(document.getElementById('freightValue').value) || 0;
         const clearingCharges = parseFloat(document.getElementById('clearingCharges').value) || 0;
+        console.log("BASHAR FREIGHT:", freight);
         const containers = parseInt(document.getElementById('containers').value) || 1;
         const clearanceFeesTemplate = document.getElementById('clearanceFeesTemplate').value;
 
@@ -314,8 +337,13 @@ document.addEventListener('DOMContentLoaded', function() {
             const totalCostKDForRow = parseFloat(row.querySelector('.item-total-cost-kd').value) || 0;
             const lineFreightCharge = totalCostKD > 0 ? (totalCostKDForRow / totalCostKD) * freight : 0;
             const lineClearingCharge = totalCostKD > 0 ? (totalCostKDForRow / totalCostKD) * totalClearingCharges : 0;
+            
+            // Update the freight charges and clearing charges inputs
             row.querySelector('.freight-charges').value = lineFreightCharge.toFixed(4);
             row.querySelector('.clearing-charges').value = lineClearingCharge.toFixed(4);
+
+            console.log(`Line Freight Charge: ${lineFreightCharge.toFixed(4)}`);
+            console.log(`Line Clearing Charge: ${lineClearingCharge.toFixed(4)}`);
 
             // Calculate and update Total Landed Cost
             const costOfMoney = parseFloat(row.querySelector('.cost-of-money').value) || 0;
@@ -333,18 +361,26 @@ document.addEventListener('DOMContentLoaded', function() {
             // Calculate GP
             const totalSalesValueForRow = parseFloat(row.querySelector('.total-sale-value').value) || 0;
             const gp = totalSalesValueForRow - (unitLandedCostOC * quantity);
-            const gpKWD = totalSalesValueForRow - rowLandedCost;
+            const gpKWD = totalSalesValueForRow * exchangeRate - rowLandedCost;
             row.querySelector('.gp').value = gp.toFixed(4);
-            row.querySelector('.gp-kwd').value = (gp * exchangeRate).toFixed(4);
+            row.querySelector('.gp-kwd').value = gpKWD.toFixed(4);
             
             totalLandedCost += rowLandedCost;
             totalGrossProfit += gp;
+            totalGrossProfitKWD += gpKWD;
 
-            console.log(`Row GP calculation:
+            console.log(`Row calculation details:
+                Total Cost KD: ${totalCostKDForRow.toFixed(4)}
+                Line Freight Charge: ${lineFreightCharge.toFixed(4)}
+                Line Clearing Charge: ${lineClearingCharge.toFixed(4)}
+                Cost of Money: ${costOfMoney.toFixed(4)}
+                Custom Charges: ${customCharges.toFixed(4)}
+                Row Landed Cost: ${rowLandedCost.toFixed(4)}
+                Unit Landed Cost KD: ${unitLandedCostKD.toFixed(4)}
+                Unit Landed Cost OC: ${unitLandedCostOC.toFixed(4)}
                 Total Sales Value: ${totalSalesValueForRow.toFixed(4)}
-                Unit Landed Cost (OC): ${unitLandedCostOC.toFixed(4)}
-                Quantity: ${quantity}
                 GP: ${gp.toFixed(4)}
+                GP (KWD): ${gpKWD.toFixed(4)}
             `);
         });
 
@@ -358,8 +394,17 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('totalSalesValue').value = formatNumber(totalSalesValue, 2);
         document.getElementById('totalSalesValueKWD').value = formatNumber(totalSalesValueKWD, 2);
         document.getElementById('totalGrossProfit').value = formatNumber(totalGrossProfit, 2);
+        document.getElementById('totalGrossProfitKWD').value = formatNumber(totalGrossProfitKWD, 2);
         
-        console.log(`Total Gross Profit: ${totalGrossProfit.toFixed(4)}`);
+        console.log(`Totals:
+            Total Cost: ${totalCost.toFixed(4)}
+            Total Cost KD: ${totalCostKD.toFixed(4)}
+            Total Freight: ${freight.toFixed(4)}
+            Total Clearing Charges: ${totalClearingCharges.toFixed(4)}
+            Total Landed Cost: ${totalLandedCost.toFixed(4)}
+            Total Gross Profit: ${totalGrossProfit.toFixed(4)}
+            Total Gross Profit (KWD): ${totalGrossProfitKWD.toFixed(4)}
+        `);
     }
 
     // Add event listeners to the item table
@@ -371,7 +416,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Remember to call updateTotals() whenever you add or remove rows from the table
 
     // Add event listeners for freight value changes
-    document.getElementById('freightValue').addEventListener('input', updateTotals);
+    document.getElementById('freightValue').addEventListener('input', function() {
+        console.log('Freight value changed:', this.value);
+        updateAllRows();
+        updateTotals();
+        updateAllRows();
+        updateTotals();
+    });
     
     // Add event listener for clearance fees template changes
     document.getElementById('clearanceFeesTemplate').addEventListener('change', function() {
@@ -413,7 +464,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setupNumericInput('discount', 2);
     setupNumericInput('containers', 0);
     setupNumericInput('clearingCharges', 2);
-    setupNumericInput('freightValue', 4);
+    //setupNumericInput('freightValue', 4);
     setupNumericInput('customChargesPercentage', 2);
 
     // Set up numeric inputs for total summary fields
@@ -559,4 +610,19 @@ document.addEventListener('DOMContentLoaded', function() {
     if (sellOriginalCurrencyCheckbox) {
         sellOriginalCurrencyCheckbox.addEventListener('change', updateSellCurrency);
     }
+});
+
+console.log('Freight Value:', document.getElementById('freightValue').value);
+
+document.getElementById('freightValue').addEventListener('input', function() {
+    console.log('Freight value changed:', this.value);
+    //updateAllRows();
+    updateTotals();
+    //updateAllRows();
+    //updateTotals();
+});
+
+document.getElementById('clearingCharges').addEventListener('input', function() {
+    console.log('Clearing charges changed:', this.value);
+    updateAllRows();
 });
