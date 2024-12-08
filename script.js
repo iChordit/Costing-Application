@@ -3,6 +3,14 @@ document.addEventListener('DOMContentLoaded', function() {
     var sidebar = document.getElementById('sidebar');
     var content = document.getElementById('content');
 
+    // Generate and set the Costing ID
+    function generateCostingId() {
+        const randomNum = Math.floor(Math.random() * 100000).toString().padStart(5, '0');
+        return `PC-${randomNum}`;
+    }
+    
+    document.getElementById('costingId').value = generateCostingId();
+
     sidebarCollapse.addEventListener('click', function() {
         sidebar.classList.toggle('collapsed');
         content.classList.toggle('active');
