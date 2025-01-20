@@ -122,6 +122,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const salePrice = parseFloat(row.querySelector('.sale-price').value) || 0;
         const customCharges = parseFloat(document.getElementById('customChargesPercentage').value) || 0;
         const sellInOriginalCurrency = document.getElementById('sellOriginalCurrency').checked;
+        const tradingCommission = parseFloat(row.querySelector('.trading-commission').value) || 0;
 
         const discountedCost = cost * (1 - discount / 100);
         const totalCost = discountedCost * quantity;
@@ -130,7 +131,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const totalCustomCharges = totalCostKD * customCharges / 100;
         const totalSalesValue = sellInOriginalCurrency ? salePrice * quantity : (salePrice * quantity) / exchangeRate;
         const totalSalesValueKWD = sellInOriginalCurrency ? totalSalesValue * exchangeRate : salePrice * quantity;
-
+        const tradingCommissionValue = (totalSalesValue * tradingCommission) / 100;
+        const tradingCommissionValueKWD = (tradingCommissionValue * exchangeRate);
         // Calculate unit landed cost in original currency
         const freightCharges = parseFloat(document.getElementById('freightValue').value) || 0;
         const clearingCharges = parseFloat(document.getElementById('clearingCharges').value) || 0;
@@ -161,6 +163,8 @@ document.addEventListener('DOMContentLoaded', function() {
         row.querySelector('.gp-kwd').value = gpKWD.toFixed(4);
         row.querySelector('.freight-charges').value = totalFreight.toFixed(4);
         row.querySelector('.clearing-charges').value = totalClearing.toFixed(4);
+        row.querySelector('.trading-commission-oc').value = tradingCommissionValue.toFixed(4);
+        row.querySelector('.trading-commission-kwd').value = tradingCommissionValueKWD.toFixed(4);
 
         console.log(`Row calculation details:
             Quantity: ${quantity}
@@ -223,6 +227,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <td><input type="number" class="form-control form-control-sm item-quantity" value="1" min="1"></td>
             <td><select class="form-select form-select-sm item-uom"></select></td>
             <td><input type="number" class="form-control form-control-sm item-cost" value="0" step="0.01"></td>
+            <td><input type="number" class="form-control form-control-sm trading-commission" value="0" step="0.01"></td>
             <td><input type="number" class="form-control form-control-sm item-discounted-cost readonly-input" readonly></td>
             <td><input type="number" class="form-control form-control-sm item-total-cost readonly-input" readonly></td>
             <td><input type="number" class="form-control form-control-sm item-total-cost-kd readonly-input" readonly></td>
@@ -233,6 +238,8 @@ document.addEventListener('DOMContentLoaded', function() {
             <td><input type="number" class="form-control form-control-sm sale-price" value="0" step="0.01"></td>
             <td><input type="number" class="form-control form-control-sm total-sale-value readonly-input" readonly></td>
             <td><input type="number" class="form-control form-control-sm total-sale-value-kwd readonly-input" readonly></td>
+            <td><input type="number" class="form-control form-control-sm trading-commission-oc readonly-input" readonly></td>
+            <td><input type="number" class="form-control form-control-sm trading-commission-kwd readonly-input" readonly></td>
             <td><input type="number" class="form-control form-control-sm gp readonly-input" readonly></td>
             <td><input type="number" class="form-control form-control-sm gp-kwd readonly-input" readonly></td>
             <td><button type="button" class="btn btn-danger btn-sm delete-row">X</button></td>
@@ -367,9 +374,12 @@ document.addEventListener('DOMContentLoaded', function() {
             row.querySelector('.unit-landed-cost-oc').value = unitLandedCostOC.toFixed(4);
             
             // Calculate GP
+            const tradingCommissionForRow = parseFloat(row.querySelector('.trading-commission').value) || 0;
+            const totalCostForRow = parseFloat(row.querySelector('.item-total-cost').value) || 0;
+            const tradingCommissionValueForRow = (totalCostForRow * tradingCommissionForRow) / 100;
             const totalSalesValueForRow = parseFloat(row.querySelector('.total-sale-value').value) || 0;
-            const gp = totalSalesValueForRow - (unitLandedCostOC * quantity);
-            const gpKWD = totalSalesValueForRow * exchangeRate - rowLandedCost;
+            const gp = totalSalesValueForRow - (unitLandedCostOC * quantity) + tradingCommissionValueForRow;
+            const gpKWD = totalSalesValueForRow * exchangeRate - rowLandedCost + (tradingCommissionValueForRow * exchangeRate);
             row.querySelector('.gp').value = gp.toFixed(4);
             row.querySelector('.gp-kwd').value = gpKWD.toFixed(4);
             
@@ -497,6 +507,7 @@ document.addEventListener('DOMContentLoaded', function() {
             '80px',  // Quantity
             '100px', // UOM
             '100px', // Cost
+            '100px', // Trading Commission
             '100px', // Discounted Cost
             '100px', // Total Cost
             '100px', // Total Cost KD
@@ -510,6 +521,8 @@ document.addEventListener('DOMContentLoaded', function() {
             '100px', // Sale Price
             '100px', // Total Sale Value
             '100px', // Total Sale Value (KWD)
+            '100px', // Trading Commission
+            '100px', // Trading Commission (KWD)
             '100px', // GP
             '100px', // GP (KWD)
             '50px'   // Delete button
@@ -539,17 +552,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const currencySelect = document.getElementById('currency');
 
     function updateSalePriceHeader() {
-        const salePriceHeader = itemTable.querySelector('th:nth-child(15)'); // Adjust this selector if needed
-        const gpHeader = itemTable.querySelector('th:nth-child(18)'); // Adjust this selector if needed
+        const salePriceHeader = itemTable.querySelector('th:nth-child(16)'); // Adjust this selector if needed
+        //const gpHeader = itemTable.querySelector('th:nth-child(18)'); // Adjust this selector if needed
         
-        if (salePriceHeader && gpHeader) {
+        if (salePriceHeader) {
             const currencyValue = currencySelect.value || 'OC';
             if (sellOriginalCurrencyCheckbox.checked) {
                 salePriceHeader.textContent = `Sale Price (${currencyValue}/unit)`;
             } else {
                 salePriceHeader.textContent = 'Sale Price (KWD/unit)';
             }
-            gpHeader.textContent = `GP (${currencyValue})`;
+            //gpHeader.textContent = `GP (${currencyValue})`;
         }
     }
 
