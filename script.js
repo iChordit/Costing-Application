@@ -131,7 +131,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const totalCustomCharges = totalCostKD * customCharges / 100;
         const totalSalesValue = sellInOriginalCurrency ? salePrice * quantity : (salePrice * quantity) / exchangeRate;
         const totalSalesValueKWD = sellInOriginalCurrency ? totalSalesValue * exchangeRate : salePrice * quantity;
-        const tradingCommissionValue = (totalCost * tradingCommission) / 100;
+        const tradingCommissionValue = (totalSalesValue * tradingCommission) / 100;
         const tradingCommissionValueKWD = (tradingCommissionValue * exchangeRate);
         // Calculate unit landed cost in original currency
         const freightCharges = parseFloat(document.getElementById('freightValue').value) || 0;
@@ -313,9 +313,6 @@ document.addEventListener('DOMContentLoaded', function() {
         let totalSalesValueKWD = 0;
         let totalGrossProfit = 0;
         let totalGrossProfitKWD = 0;
-        let totalTradingCommissionOC = 0;
-        let totalTradingCommissionKWD = 0;
-        
         const rows = document.querySelectorAll('#itemTable tbody tr');
         const freight = parseFloat(document.getElementById('freightValue').value) || 0;
         const clearingCharges = parseFloat(document.getElementById('clearingCharges').value) || 0;
@@ -394,12 +391,6 @@ document.addEventListener('DOMContentLoaded', function() {
             totalGrossProfit += gp;
             totalGrossProfitKWD += gpKWD;
 
-            // Add these lines to sum up trading commissions
-            const tradingCommissionOC = parseFloat(row.querySelector('.trading-commission-oc').value) || 0;
-            const tradingCommissionKWD = parseFloat(row.querySelector('.trading-commission-kwd').value) || 0;
-            totalTradingCommissionOC += tradingCommissionOC;
-            totalTradingCommissionKWD += tradingCommissionKWD;
-
             console.log(`Row calculation details:
                 Total Cost KD: ${totalCostKDForRow.toFixed(4)}
                 Line Freight Charge: ${lineFreightCharge.toFixed(4)}
@@ -426,8 +417,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('totalSalesValueKWD').value = formatNumber(totalSalesValueKWD, 2);
         document.getElementById('totalGrossProfit').value = formatNumber(totalGrossProfit, 2);
         document.getElementById('totalGrossProfitKWD').value = formatNumber(totalGrossProfitKWD, 2);
-        document.getElementById('totalTradingCommissionOC').value = formatNumber(totalTradingCommissionOC, 2);
-        document.getElementById('totalTradingCommissionKWD').value = formatNumber(totalTradingCommissionKWD, 2);
         
         console.log(`Totals:
             Total Cost: ${totalCost.toFixed(4)}
@@ -437,8 +426,6 @@ document.addEventListener('DOMContentLoaded', function() {
             Total Landed Cost: ${totalLandedCost.toFixed(4)}
             Total Gross Profit: ${totalGrossProfit.toFixed(4)}
             Total Gross Profit (KWD): ${totalGrossProfitKWD.toFixed(4)}
-            Total Trading Commission (OC): ${totalTradingCommissionOC.toFixed(4)}
-            Total Trading Commission (KWD): ${totalTradingCommissionKWD.toFixed(4)}
         `);
     }
 
@@ -511,8 +498,6 @@ document.addEventListener('DOMContentLoaded', function() {
     setupNumericInput('totalLandedCost', 2);
     setupNumericInput('totalSalesValue', 2);
     setupNumericInput('totalSalesValueKWD', 2);
-    setupNumericInput('totalTradingCommissionOC', 2);
-    setupNumericInput('totalTradingCommissionKWD', 2);
 
     // Add this new function to set up the table layout
     function setupTableLayout() {
