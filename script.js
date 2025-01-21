@@ -123,7 +123,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const customCharges = parseFloat(document.getElementById('customChargesPercentage').value) || 0;
         const sellInOriginalCurrency = document.getElementById('sellOriginalCurrency').checked;
         const tradingCommission = parseFloat(row.querySelector('.trading-commission').value) || 0;
-
+        const salesFocDiscount = parseFloat(row.querySelector('.sales-foc-discount').value) || 0;
         const discountedCost = cost * (1 - discount / 100);
         const totalCost = discountedCost * quantity;
         const totalCostKD = totalCost * exchangeRate;
@@ -147,8 +147,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const unitLandedCostOC = unitLandedCostKD / exchangeRate;
 
         // Calculate GP
-        const gp = totalSalesValue - (unitLandedCostOC * quantity);
-        const gpKWD = totalSalesValueKWD - totalLandedCost;
+        const gp = totalSalesValue - (unitLandedCostOC * quantity) - (totalSalesValue * salesFocDiscount / 100);
+        const gpKWD = totalSalesValueKWD - totalLandedCost - (totalSalesValueKWD * salesFocDiscount / 100);
 
         row.querySelector('.item-discounted-cost').value = discountedCost.toFixed(4);
         row.querySelector('.item-total-cost').value = totalCost.toFixed(4);
@@ -165,7 +165,6 @@ document.addEventListener('DOMContentLoaded', function() {
         row.querySelector('.clearing-charges').value = totalClearing.toFixed(4);
         row.querySelector('.trading-commission-oc').value = tradingCommissionValue.toFixed(4);
         row.querySelector('.trading-commission-kwd').value = tradingCommissionValueKWD.toFixed(4);
-
         console.log(`Row calculation details:
             Quantity: ${quantity}
             Total Cost KD: ${totalCostKD.toFixed(4)}
@@ -238,6 +237,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <td><input type="number" class="form-control form-control-sm sale-price" value="0" step="0.01"></td>
             <td><input type="number" class="form-control form-control-sm total-sale-value readonly-input" readonly></td>
             <td><input type="number" class="form-control form-control-sm total-sale-value-kwd readonly-input" readonly></td>
+            <td><input type="number" class="form-control form-control-sm sales-foc-discount value="0" step="1.00"></td>
             <td><input type="number" class="form-control form-control-sm trading-commission-oc readonly-input" readonly></td>
             <td><input type="number" class="form-control form-control-sm trading-commission-kwd readonly-input" readonly></td>
             <td><input type="number" class="form-control form-control-sm gp readonly-input" readonly></td>
@@ -257,10 +257,15 @@ document.addEventListener('DOMContentLoaded', function() {
         const saleInput = newRow.querySelector('.sale-price');
         const detailsBtn = newRow.querySelector('.show-details');
         const tradingCommissionInput = newRow.querySelector('.trading-commission');
+        const salesFocDiscountInput = newRow.querySelector('.sales-foc-discount');
         // Populate UOM dropdown
         populateUOMOptions(uomSelect);
 
         quantityInput.addEventListener('input', () => {
+            updateRowCalculations(newRow);
+            updateTotals();
+        });
+        salesFocDiscountInput.addEventListener('input', () => {
             updateRowCalculations(newRow);
             updateTotals();
         });
@@ -381,9 +386,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const tradingCommissionForRow = parseFloat(row.querySelector('.trading-commission').value) || 0;
             const totalCostForRow = parseFloat(row.querySelector('.item-total-cost').value) || 0;
             const tradingCommissionValueForRow = (totalCostForRow * tradingCommissionForRow) / 100;
+            const salesFocDiscountForRow = parseFloat(row.querySelector('.sales-foc-discount').value) || 0;
             const totalSalesValueForRow = parseFloat(row.querySelector('.total-sale-value').value) || 0;
-            const gp = totalSalesValueForRow - (unitLandedCostOC * quantity) + tradingCommissionValueForRow;
-            const gpKWD = totalSalesValueForRow * exchangeRate - rowLandedCost + (tradingCommissionValueForRow * exchangeRate);
+            const gp = totalSalesValueForRow - (unitLandedCostOC * quantity) + tradingCommissionValueForRow - (totalSalesValueForRow * salesFocDiscountForRow / 100);
+            const gpKWD = totalSalesValueForRow * exchangeRate - rowLandedCost + (tradingCommissionValueForRow * exchangeRate) - (totalSalesValueForRow * exchangeRate * salesFocDiscountForRow / 100);
             row.querySelector('.gp').value = gp.toFixed(4);
             row.querySelector('.gp-kwd').value = gpKWD.toFixed(4);
             
