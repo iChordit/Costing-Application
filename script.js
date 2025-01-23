@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Calculate GP
         const gp = totalSalesValue - (unitLandedCostOC * quantity) - (totalSalesValue * salesFocDiscount / 100);
         const gpKWD = totalSalesValueKWD - totalLandedCost - (totalSalesValueKWD * salesFocDiscount / 100);
-
+        const gpMargin = gp / totalSalesValue * 100;
         row.querySelector('.item-discounted-cost').value = discountedCost.toFixed(4);
         row.querySelector('.item-total-cost').value = totalCost.toFixed(4);
         row.querySelector('.item-total-cost-kd').value = totalCostKD.toFixed(4);
@@ -165,7 +165,8 @@ document.addEventListener('DOMContentLoaded', function() {
         row.querySelector('.clearing-charges').value = totalClearing.toFixed(4);
         row.querySelector('.trading-commission-oc').value = tradingCommissionValue.toFixed(4);
         row.querySelector('.trading-commission-kwd').value = tradingCommissionValueKWD.toFixed(4);
-        console.log(`Row calculation details:
+        row.querySelector('.gp-margin').value = gpMargin.toFixed(4);
+        console.log(`Row calculation details (updateRowCalculations):
             Quantity: ${quantity}
             Total Cost KD: ${totalCostKD.toFixed(4)}
             Total Cost KD (All): ${totalCostKDAll.toFixed(4)}
@@ -242,6 +243,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <td><input type="number" class="form-control form-control-sm trading-commission-kwd readonly-input" readonly></td>
             <td><input type="number" class="form-control form-control-sm gp readonly-input" readonly></td>
             <td><input type="number" class="form-control form-control-sm gp-kwd readonly-input" readonly></td>
+            <td><input type="number" class="form-control form-control-sm gp-margin readonly-input" readonly></td>
             <td><button type="button" class="btn btn-danger btn-sm delete-row">X</button></td>
             <input type="hidden" class="freight-charges">
             <input type="hidden" class="cost-of-money">
@@ -318,6 +320,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let totalSalesValueKWD = 0;
         let totalGrossProfit = 0;
         let totalGrossProfitKWD = 0;
+        let totalGpMargin = 0;
         const rows = document.querySelectorAll('#itemTable tbody tr');
         const freight = parseFloat(document.getElementById('freightValue').value) || 0;
         const clearingCharges = parseFloat(document.getElementById('clearingCharges').value) || 0;
@@ -384,20 +387,20 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Calculate GP
             const tradingCommissionForRow = parseFloat(row.querySelector('.trading-commission').value) || 0;
-            const totalCostForRow = parseFloat(row.querySelector('.item-total-cost').value) || 0;
-            const tradingCommissionValueForRow = (totalCostForRow * tradingCommissionForRow) / 100;
-            const salesFocDiscountForRow = parseFloat(row.querySelector('.sales-foc-discount').value) || 0;
             const totalSalesValueForRow = parseFloat(row.querySelector('.total-sale-value').value) || 0;
+            const tradingCommissionValueForRow = (totalSalesValueForRow * tradingCommissionForRow) / 100;
+            const salesFocDiscountForRow = parseFloat(row.querySelector('.sales-foc-discount').value) || 0;
             const gp = totalSalesValueForRow - (unitLandedCostOC * quantity) + tradingCommissionValueForRow - (totalSalesValueForRow * salesFocDiscountForRow / 100);
             const gpKWD = totalSalesValueForRow * exchangeRate - rowLandedCost + (tradingCommissionValueForRow * exchangeRate) - (totalSalesValueForRow * exchangeRate * salesFocDiscountForRow / 100);
+            const gpMargin = gp / totalSalesValueForRow * 100;
             row.querySelector('.gp').value = gp.toFixed(4);
             row.querySelector('.gp-kwd').value = gpKWD.toFixed(4);
-            
+            row.querySelector('.gp-margin').value = gpMargin.toFixed(4);
             totalLandedCost += rowLandedCost;
             totalGrossProfit += gp;
             totalGrossProfitKWD += gpKWD;
 
-            console.log(`Row calculation details:
+            console.log(`Row calculation details (updateTotals):
                 Total Cost KD: ${totalCostKDForRow.toFixed(4)}
                 Line Freight Charge: ${lineFreightCharge.toFixed(4)}
                 Line Clearing Charge: ${lineClearingCharge.toFixed(4)}
@@ -409,6 +412,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 Total Sales Value: ${totalSalesValueForRow.toFixed(4)}
                 GP: ${gp.toFixed(4)}
                 GP (KWD): ${gpKWD.toFixed(4)}
+                GP Margin: ${gpMargin.toFixed(4)}
             `);
         });
 
