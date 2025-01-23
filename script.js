@@ -43,18 +43,14 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('freightCharges').addEventListener('change', function() {
         document.getElementById('freightValueGroup').style.display = this.checked ? 'block' : 'none';
         document.getElementById('freightValue').value = 0;
-        updateAllRows();
-        updateTotals();
-        updateAllRows();
-        updateTotals();
+        updateCalculations();
     });
 
     // Toggle visibility of custom charges percentage input
     document.getElementById('customCharges').addEventListener('change', function() {
         document.getElementById('customChargesGroup').style.display = this.checked ? 'block' : 'none';
         document.getElementById('customChargesPercentage').value = 0;
-        updateAllRows()
-        updateTotals();
+        updateCalculations();
     });
 
     // Form submission handler
@@ -114,72 +110,108 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Update the updateRowCalculations function
     function updateRowCalculations(row) {
-        const quantity = parseFloat(row.querySelector('.item-quantity').value) || 0;
-        const cost = parseFloat(row.querySelector('.item-cost').value) || 0;
-        const discount = parseFloat(document.getElementById('discount').value) || 0;
-        const exchangeRate = parseFloat(document.getElementById('exchangeRate').value) || 1;
-        const costOfMoney = parseFloat(document.getElementById('costOfMoney').value) || 0;
-        const salePrice = parseFloat(row.querySelector('.sale-price').value) || 0;
-        const customCharges = parseFloat(document.getElementById('customChargesPercentage').value) || 0;
-        const sellInOriginalCurrency = document.getElementById('sellOriginalCurrency').checked;
-        const tradingCommission = parseFloat(row.querySelector('.trading-commission').value) || 0;
-        const salesFocDiscount = parseFloat(row.querySelector('.sales-foc-discount').value) || 0;
-        const discountedCost = cost * (1 - discount / 100);
-        const totalCost = discountedCost * quantity;
-        const totalCostKD = totalCost * exchangeRate;
-        const totalCostOfMoney = totalCostKD * costOfMoney / 100;
-        const totalCustomCharges = totalCostKD * customCharges / 100;
-        const totalSalesValue = sellInOriginalCurrency ? salePrice * quantity : (salePrice * quantity) / exchangeRate;
-        const totalSalesValueKWD = sellInOriginalCurrency ? totalSalesValue * exchangeRate : salePrice * quantity;
-        const tradingCommissionValue = (totalSalesValue * tradingCommission) / 100;
-        const tradingCommissionValueKWD = (tradingCommissionValue * exchangeRate);
-        // Calculate unit landed cost in original currency
-        const freightCharges = parseFloat(document.getElementById('freightValue').value) || 0;
-        const clearingCharges = parseFloat(document.getElementById('clearingCharges').value) || 0;
-        const totalCostKDAll = parseFloat(document.getElementById('totalCostKD').value) || 1;
-        
-        // Calculate freight and clearing charges proportionally
-        const totalFreight = freightCharges * (totalCostKD / totalCostKDAll);
-        const totalClearing = clearingCharges * (totalCostKD / totalCostKDAll);
-        
-        const totalLandedCost = totalCostKD + totalFreight + totalCostOfMoney + totalClearing + totalCustomCharges;
-        const unitLandedCostKD = quantity > 0 ? totalLandedCost / quantity : 0;
-        const unitLandedCostOC = unitLandedCostKD / exchangeRate;
+        // Extract input values with default values and validation
+        const values = {
+            quantity: parseFloat(row.querySelector('.item-quantity').value) || 0,
+            cost: parseFloat(row.querySelector('.item-cost').value) || 0,
+            discount: parseFloat(document.getElementById('discount').value) || 0,
+            exchangeRate: parseFloat(document.getElementById('exchangeRate').value) || 1,
+            costOfMoney: parseFloat(document.getElementById('costOfMoney').value) || 0,
+            salePrice: parseFloat(row.querySelector('.sale-price').value) || 0,
+            customCharges: parseFloat(document.getElementById('customChargesPercentage').value) || 0,
+            tradingCommission: parseFloat(row.querySelector('.trading-commission').value) || 0,
+            salesFocDiscount: parseFloat(row.querySelector('.sales-foc-discount').value) || 0,
+            freightCharges: parseFloat(document.getElementById('freightValue').value) || 0,
+            clearingCharges: parseFloat(document.getElementById('clearingCharges').value) || 0,
+            totalCostKDAll: parseFloat(document.getElementById('totalCostKD').value) || 1,
+            sellInOriginalCurrency: document.getElementById('sellOriginalCurrency').checked
+        };
 
-        // Calculate GP
-        const gp = totalSalesValue - (unitLandedCostOC * quantity) - (totalSalesValue * salesFocDiscount / 100);
-        const gpKWD = totalSalesValueKWD - totalLandedCost - (totalSalesValueKWD * salesFocDiscount / 100);
-        const gpMargin = gp / totalSalesValue * 100;
-        row.querySelector('.item-discounted-cost').value = discountedCost.toFixed(4);
-        row.querySelector('.item-total-cost').value = totalCost.toFixed(4);
-        row.querySelector('.item-total-cost-kd').value = totalCostKD.toFixed(4);
-        row.querySelector('.cost-of-money').value = totalCostOfMoney.toFixed(4);
-        row.querySelector('.custom-charges').value = totalCustomCharges.toFixed(4);
-        row.querySelector('.total-sale-value').value = totalSalesValue.toFixed(4);
-        row.querySelector('.total-sale-value-kwd').value = totalSalesValueKWD.toFixed(4);
-        row.querySelector('.unit-landed-cost-kd').value = unitLandedCostKD.toFixed(4);
-        row.querySelector('.unit-landed-cost-oc').value = unitLandedCostOC.toFixed(4);
-        row.querySelector('.gp').value = gp.toFixed(4);
-        row.querySelector('.gp-kwd').value = gpKWD.toFixed(4);
-        row.querySelector('.freight-charges').value = totalFreight.toFixed(4);
-        row.querySelector('.clearing-charges').value = totalClearing.toFixed(4);
-        row.querySelector('.trading-commission-oc').value = tradingCommissionValue.toFixed(4);
-        row.querySelector('.trading-commission-kwd').value = tradingCommissionValueKWD.toFixed(4);
-        row.querySelector('.gp-margin').value = gpMargin.toFixed(4);
-        console.log(`Row calculation details (updateRowCalculations):
-            Quantity: ${quantity}
-            Total Cost KD: ${totalCostKD.toFixed(4)}
-            Total Cost KD (All): ${totalCostKDAll.toFixed(4)}
-            Freight Charges (Total): ${freightCharges}
-            Freight Charges (Row): ${totalFreight}
-            Clearing Charges (Total): ${clearingCharges.toFixed(4)}
-            Clearing Charges (Row): ${totalClearing.toFixed(4)}
-            Unit Landed Cost (KD): ${unitLandedCostKD.toFixed(4)}
-            Unit Landed Cost (OC): ${unitLandedCostOC.toFixed(4)}
-            Total Sales Value: ${totalSalesValue.toFixed(4)}
-            GP: ${gp.toFixed(4)}
-            GP (KWD): ${gpKWD.toFixed(4)}
-        `);
+        // Calculate intermediate values
+        const calculations = {
+            discountedCost: values.cost * (1 - values.discount / 100),
+            totalCost: 0,
+            totalCostKD: 0,
+            totalSalesValue: 0,
+            totalSalesValueKWD: 0,
+            tradingCommissionValue: 0,
+            tradingCommissionValueKWD: 0,
+            totalFreight: 0,
+            totalClearing: 0,
+            totalLandedCost: 0,
+            unitLandedCostKD: 0,
+            unitLandedCostOC: 0,
+            gp: 0,
+            gpKWD: 0,
+            gpMargin: 0
+        };
+
+        // Perform calculations
+        calculations.totalCost = calculations.discountedCost * values.quantity;
+        calculations.totalCostKD = calculations.totalCost * values.exchangeRate;
+        calculations.totalSalesValue = values.sellInOriginalCurrency ? 
+            values.salePrice * values.quantity : 
+            (values.salePrice * values.quantity) / values.exchangeRate;
+        calculations.totalSalesValueKWD = values.sellInOriginalCurrency ? 
+            calculations.totalSalesValue * values.exchangeRate : 
+            values.salePrice * values.quantity;
+        
+        // Calculate proportional charges
+        calculations.totalFreight = values.freightCharges * (calculations.totalCostKD / values.totalCostKDAll);
+        calculations.totalClearing = values.clearingCharges * (calculations.totalCostKD / values.totalCostKDAll);
+        calculations.totalCostOfMoney = calculations.totalCostKD * values.costOfMoney / 100;
+        calculations.totalCustomCharges = calculations.totalCostKD * values.customCharges / 100;
+
+        // Calculate landed costs
+        calculations.totalLandedCost = calculations.totalCostKD + 
+            calculations.totalFreight + 
+            calculations.totalCostOfMoney + 
+            calculations.totalClearing + 
+            calculations.totalCustomCharges;
+        
+        calculations.unitLandedCostKD = values.quantity > 0 ? calculations.totalLandedCost / values.quantity : 0;
+        calculations.unitLandedCostOC = calculations.unitLandedCostKD / values.exchangeRate;
+
+        // Calculate trading commission and GP
+        calculations.tradingCommissionValue = (calculations.totalSalesValue * values.tradingCommission) / 100;
+        calculations.tradingCommissionValueKWD = calculations.tradingCommissionValue * values.exchangeRate;
+        calculations.gp = calculations.totalSalesValue - 
+            (calculations.unitLandedCostOC * values.quantity) - 
+            (calculations.totalSalesValue * values.salesFocDiscount / 100);
+        calculations.gpKWD = calculations.totalSalesValueKWD - 
+            calculations.totalLandedCost - 
+            (calculations.totalSalesValueKWD * values.salesFocDiscount / 100);
+        calculations.gpMargin = calculations.gp / calculations.totalSalesValue * 100;
+
+        // Update row values
+        updateRowValues(row, calculations);
+    }
+
+    // Helper function to update row values
+    function updateRowValues(row, calc) {
+        const fields = {
+            '.item-discounted-cost': calc.discountedCost,
+            '.item-total-cost': calc.totalCost,
+            '.item-total-cost-kd': calc.totalCostKD,
+            '.cost-of-money': calc.totalCostOfMoney,
+            '.custom-charges': calc.totalCustomCharges,
+            '.total-sale-value': calc.totalSalesValue,
+            '.total-sale-value-kwd': calc.totalSalesValueKWD,
+            '.unit-landed-cost-kd': calc.unitLandedCostKD,
+            '.unit-landed-cost-oc': calc.unitLandedCostOC,
+            '.gp': calc.gp,
+            '.gp-kwd': calc.gpKWD,
+            '.freight-charges': calc.totalFreight,
+            '.clearing-charges': calc.totalClearing,
+            '.trading-commission-oc': calc.tradingCommissionValue,
+            '.trading-commission-kwd': calc.tradingCommissionValueKWD,
+            '.gp-margin': calc.gpMargin
+        };
+
+        Object.entries(fields).forEach(([selector, value]) => {
+            const element = row.querySelector(selector);
+            if (element) element.value = value.toFixed(4);
+        });
     }
 
     // Function to update all rows
@@ -321,6 +353,8 @@ document.addEventListener('DOMContentLoaded', function() {
         let totalGrossProfit = 0;
         let totalGrossProfitKWD = 0;
         let totalGpMargin = 0;
+        let totalTradingCommissionOC = 0;
+        let totalTradingCommissionKWD = 0;
         const rows = document.querySelectorAll('#itemTable tbody tr');
         const freight = parseFloat(document.getElementById('freightValue').value) || 0;
         const clearingCharges = parseFloat(document.getElementById('clearingCharges').value) || 0;
@@ -400,6 +434,19 @@ document.addEventListener('DOMContentLoaded', function() {
             totalGrossProfit += gp;
             totalGrossProfitKWD += gpKWD;
 
+            // Calculate trading commission for the row
+            const tradingCommissionPercent = parseFloat(row.querySelector('.trading-commission').value) || 0;
+            const tradingCommissionOC = (totalSalesValueForRow * tradingCommissionPercent) / 100;
+            const tradingCommissionKWD = tradingCommissionOC * exchangeRate;
+
+            // Update trading commission fields in the row
+            row.querySelector('.trading-commission-oc').value = tradingCommissionOC.toFixed(4);
+            row.querySelector('.trading-commission-kwd').value = tradingCommissionKWD.toFixed(4);
+
+            // Accumulate trading commission totals
+            totalTradingCommissionOC += tradingCommissionOC;
+            totalTradingCommissionKWD += tradingCommissionKWD;
+
             console.log(`Row calculation details (updateTotals):
                 Total Cost KD: ${totalCostKDForRow.toFixed(4)}
                 Line Freight Charge: ${lineFreightCharge.toFixed(4)}
@@ -428,6 +475,8 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('totalGrossProfit').value = formatNumber(totalGrossProfit, 2);
         document.getElementById('totalGrossProfitKWD').value = formatNumber(totalGrossProfitKWD, 2);
         document.getElementById('totalGpMargin').value = formatNumber(totalGrossProfit/totalSalesValue*100, 2);
+        document.getElementById('totalTradingCommissionOC').value = formatNumber(totalTradingCommissionOC, 2);
+        document.getElementById('totalTradingCommissionKWD').value = formatNumber(totalTradingCommissionKWD, 2);
         
         console.log(`Totals:
             Total Cost: ${totalCost.toFixed(4)}
@@ -645,6 +694,167 @@ document.addEventListener('DOMContentLoaded', function() {
     // Update the event listener for the checkbox
     if (sellOriginalCurrencyCheckbox) {
         sellOriginalCurrencyCheckbox.addEventListener('change', updateSellCurrency);
+    }
+
+    function updateCalculations() {
+        const rows = document.querySelectorAll('#itemTable tbody tr');
+        const globalValues = {
+            exchangeRate: parseFloat(document.getElementById('exchangeRate').value) || 1,
+            discount: parseFloat(document.getElementById('discount').value) || 0,
+            freight: parseFloat(document.getElementById('freightValue').value) || 0,
+            clearingCharges: parseFloat(document.getElementById('clearingCharges').value) || 0,
+            costOfMoney: parseFloat(document.getElementById('costOfMoney').value) || 0,
+            customCharges: parseFloat(document.getElementById('customChargesPercentage').value) || 0,
+            containers: parseInt(document.getElementById('containers').value) || 1,
+            clearanceFeesTemplate: document.getElementById('clearanceFeesTemplate').value,
+            sellInOriginalCurrency: document.getElementById('sellOriginalCurrency').checked
+        };
+
+        // Initialize totals
+        const totals = {
+            cost: 0,
+            costKD: 0,
+            costOfMoney: 0,
+            customCharges: 0,
+            salesValue: 0,
+            salesValueKWD: 0,
+            grossProfit: 0,
+            grossProfitKWD: 0,
+            landedCost: 0,
+            tradingCommission: 0,
+            tradingCommissionKWD: 0
+        };
+
+        // First pass: calculate base totals for proportional calculations
+        rows.forEach(row => {
+            const rowValues = {
+                quantity: parseFloat(row.querySelector('.item-quantity').value) || 0,
+                cost: parseFloat(row.querySelector('.item-cost').value) || 0,
+                salePrice: parseFloat(row.querySelector('.sale-price').value) || 0,
+                tradingCommission: parseFloat(row.querySelector('.trading-commission').value) || 0,
+                salesFocDiscount: parseFloat(row.querySelector('.sales-foc-discount').value) || 0
+            };
+
+            const discountedCost = rowValues.cost * (1 - globalValues.discount / 100);
+            const totalCost = discountedCost * rowValues.quantity;
+            const totalCostKD = totalCost * globalValues.exchangeRate;
+
+            totals.cost += totalCost;
+            totals.costKD += totalCostKD;
+        });
+
+        // Calculate total clearing charges based on template
+        const totalClearingCharges = globalValues.clearanceFeesTemplate === 'Standard' 
+            ? (totals.costKD * globalValues.clearingCharges / 100) + 95 + (230 * globalValues.containers)
+            : totals.costKD * globalValues.clearingCharges / 100;
+
+        // Second pass: calculate and update each row with proportional values
+        rows.forEach(row => {
+            const rowValues = {
+                quantity: parseFloat(row.querySelector('.item-quantity').value) || 0,
+                cost: parseFloat(row.querySelector('.item-cost').value) || 0,
+                salePrice: parseFloat(row.querySelector('.sale-price').value) || 0,
+                tradingCommission: parseFloat(row.querySelector('.trading-commission').value) || 0,
+                salesFocDiscount: parseFloat(row.querySelector('.sales-foc-discount').value) || 0
+            };
+
+            // Calculate row-specific values
+            const calculations = {
+                discountedCost: rowValues.cost * (1 - globalValues.discount / 100),
+                totalCost: 0,
+                totalCostKD: 0,
+                totalSalesValue: 0,
+                totalSalesValueKWD: 0
+            };
+
+            calculations.totalCost = calculations.discountedCost * rowValues.quantity;
+            calculations.totalCostKD = calculations.totalCost * globalValues.exchangeRate;
+
+            // Calculate proportional charges
+            const proportion = calculations.totalCostKD / totals.costKD;
+            const rowFreight = globalValues.freight * proportion;
+            const rowClearing = totalClearingCharges * proportion;
+            const rowCostOfMoney = calculations.totalCostKD * globalValues.costOfMoney / 100;
+            const rowCustomCharges = calculations.totalCostKD * globalValues.customCharges / 100;
+
+            // Calculate sales values
+            calculations.totalSalesValue = globalValues.sellInOriginalCurrency
+                ? rowValues.salePrice * rowValues.quantity
+                : (rowValues.salePrice * rowValues.quantity) / globalValues.exchangeRate;
+            calculations.totalSalesValueKWD = globalValues.sellInOriginalCurrency
+                ? calculations.totalSalesValue * globalValues.exchangeRate
+                : rowValues.salePrice * rowValues.quantity;
+
+            // Calculate landed costs
+            const rowLandedCost = calculations.totalCostKD + rowFreight + rowCostOfMoney + rowClearing + rowCustomCharges;
+            const unitLandedCostKD = rowValues.quantity > 0 ? rowLandedCost / rowValues.quantity : 0;
+            const unitLandedCostOC = unitLandedCostKD / globalValues.exchangeRate;
+
+            // Calculate GP and Trading Commission
+            const tradingCommissionValue = (calculations.totalSalesValue * rowValues.tradingCommission) / 100;
+            const tradingCommissionValueKWD = tradingCommissionValue * globalValues.exchangeRate;
+            const gp = calculations.totalSalesValue - 
+                (unitLandedCostOC * rowValues.quantity) - 
+                (calculations.totalSalesValue * rowValues.salesFocDiscount / 100);
+            const gpKWD = calculations.totalSalesValueKWD - 
+                rowLandedCost - 
+                (calculations.totalSalesValueKWD * rowValues.salesFocDiscount / 100);
+            const gpMargin = calculations.totalSalesValue > 0 ? (gp / calculations.totalSalesValue * 100) : 0;
+
+            // Update row values
+            updateRowValues(row, {
+                ...calculations,
+                rowFreight,
+                rowClearing,
+                rowCostOfMoney,
+                rowCustomCharges,
+                rowLandedCost,
+                unitLandedCostKD,
+                unitLandedCostOC,
+                tradingCommissionValue,
+                tradingCommissionValueKWD,
+                gp,
+                gpKWD,
+                gpMargin
+            });
+
+            // Update running totals
+            totals.costOfMoney += rowCostOfMoney;
+            totals.customCharges += rowCustomCharges;
+            totals.salesValue += calculations.totalSalesValue;
+            totals.salesValueKWD += calculations.totalSalesValueKWD;
+            totals.grossProfit += gp;
+            totals.grossProfitKWD += gpKWD;
+            totals.landedCost += rowLandedCost;
+            totals.tradingCommission += tradingCommissionValue;
+            totals.tradingCommissionKWD += tradingCommissionValueKWD;
+        });
+
+        // Update total summary fields
+        updateTotalSummary(totals);
+    }
+
+    // Helper function to update total summary fields
+    function updateTotalSummary(totals) {
+        const summaryFields = {
+            'totalCost': totals.cost,
+            'totalCostKD': totals.costKD,
+            'totalCostOfMoney': totals.costOfMoney,
+            'totalCustomCharges': totals.customCharges,
+            'totalLandedCost': totals.landedCost,
+            'totalSalesValue': totals.salesValue,
+            'totalSalesValueKWD': totals.salesValueKWD,
+            'totalGrossProfit': totals.grossProfit,
+            'totalGrossProfitKWD': totals.grossProfitKWD,
+            'totalGpMargin': totals.salesValue > 0 ? (totals.grossProfit/totals.salesValue*100) : 0,
+            'totalTradingCommission': totals.tradingCommission,
+            'totalTradingCommissionKWD': totals.tradingCommissionKWD
+        };
+
+        Object.entries(summaryFields).forEach(([id, value]) => {
+            const element = document.getElementById(id);
+            if (element) element.value = formatNumber(value, 2);
+        });
     }
 });
 
