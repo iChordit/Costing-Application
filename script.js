@@ -427,6 +427,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('totalSalesValueKWD').value = formatNumber(totalSalesValueKWD, 2);
         document.getElementById('totalGrossProfit').value = formatNumber(totalGrossProfit, 2);
         document.getElementById('totalGrossProfitKWD').value = formatNumber(totalGrossProfitKWD, 2);
+        document.getElementById('totalGpMargin').value = formatNumber(totalGrossProfit/totalSalesValue*100, 2);
         
         console.log(`Totals:
             Total Cost: ${totalCost.toFixed(4)}
